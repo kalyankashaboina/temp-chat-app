@@ -1,140 +1,99 @@
-// src/App.tsx
-
-import { useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { lazy, Suspense, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { store } from './store';
+import { useAppDispatch, useAppSelector } from '@/store';
+import { initAuth, selectUser, selectIsInitialized } from '@/features/auth/authSlice';
+import { SettingsProvider } from '@/features/settings/components/SettingsProvider';
+import { socketClient } from '@/features/chat/services/socketClient';
 
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { checkAuth } from '@/store/auth/auth.thunks';
+const Index              = lazy(() => import('./pages/Index'));
+const LoginPage          = lazy(() => import('@/features/auth/pages/LoginPage'));
+const RegisterPage       = lazy(() => import('@/features/auth/pages/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/features/auth/pages/ForgotPasswordPage'));
+const NotFound           = lazy(() => import('./pages/NotFound'));
 
-import Index from '@/pages/Index';
-import LoginPage from '@/pages/LoginPage';
-import RegisterPage from '@/pages/RegisterPage';
-import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
-import NotFound from '@/pages/NotFound';
-
-import ProfilePage from '@/pages/ProfilePage';
-import SettingsPage from '@/pages/SettingsPage';
-
-/* =========================
-   ROUTE GUARDS
-========================= */
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const user = useAppSelector((state) => state.auth.user);
-  return user ? <>{children}</> : <Navigate to="/login" replace />;
-}
-
-function AuthRoute({ children }: { children: React.ReactNode }) {
-  const user = useAppSelector((state) => state.auth.user);
-  return user ? <Navigate to="/" replace /> : <>{children}</>;
-}
-
-console.log('App component loaded');
-console.log(import.meta.env.VITE_API_BASE_URL);
-
-/* =========================
-   ROUTES
-========================= */
-
-function AppRoutes() {
+function LoadingScreen() {
   return (
-    <Routes>
-      {/* ---------- AUTH ---------- */}
-      <Route
-        path="/login"
-        element={
-          <AuthRoute>
-            <LoginPage />
-          </AuthRoute>
-        }
-      />
-
-      <Route
-        path="/register"
-        element={
-          <AuthRoute>
-            <RegisterPage />
-          </AuthRoute>
-        }
-      />
-
-      <Route
-        path="/forgot-password"
-        element={
-          <AuthRoute>
-            <ForgotPasswordPage />
-          </AuthRoute>
-        }
-      />
-
-      {/* ---------- MAIN CHAT ---------- */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Index />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ---------- DESKTOP / TABLET PAGES ---------- */}
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <ProfilePage />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* ---------- FALLBACK ---------- */}
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <div className="flex items-center justify-center h-dvh bg-background">
+      <div className="flex flex-col items-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      </div>
+    </div>
   );
 }
 
-/* =========================
-   APP ROOT
-========================= */
-
-export default function App() {
+function AuthInit() {
   const dispatch = useAppDispatch();
-  const { status } = useAppSelector((state) => state.auth);
+  const user     = useAppSelector(selectUser);
+  const initialized = useAppSelector(selectIsInitialized);
 
+  // Validate session on mount
   useEffect(() => {
-    if (status === 'idle') {
-      dispatch(checkAuth());
+    dispatch(initAuth());
+  }, [dispatch]);
+
+  // Connect socket when authenticated
+  useEffect(() => {
+    if (user) {
+      socketClient.connect();
+    } else {
+      socketClient.disconnect();
     }
-  }, [status, dispatch]);
+  }, [user]);
 
-  if (status === 'idle') {
-    return (
-      <div className="flex h-screen items-center justify-center text-muted-foreground">
-        Loading…
-      </div>
-    );
-  }
+  if (!initialized) return <LoadingScreen />;
+  return null;
+}
 
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const user        = useAppSelector(selectUser);
+  const initialized = useAppSelector(selectIsInitialized);
+  if (!initialized) return <LoadingScreen />;
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
+
+function AuthRoute({ children }: { children: React.ReactNode }) {
+  const user        = useAppSelector(selectUser);
+  const initialized = useAppSelector(selectIsInitialized);
+  if (!initialized) return <LoadingScreen />;
+  if (user) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function AppRoutes() {
   return (
+    <>
+      <AuthInit />
+      <Suspense fallback={<LoadingScreen />}>
+        <Routes>
+          <Route path="/"                element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/login"           element={<AuthRoute><LoginPage /></AuthRoute>} />
+          <Route path="/register"        element={<AuthRoute><RegisterPage /></AuthRoute>} />
+          <Route path="/forgot-password" element={<AuthRoute><ForgotPasswordPage /></AuthRoute>} />
+          <Route path="*"                element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </>
+  );
+}
+
+const App = () => (
+  <Provider store={store}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
         <AppRoutes />
+        <SettingsProvider />
       </BrowserRouter>
     </TooltipProvider>
-  );
-}
+  </Provider>
+);
+
+export default App;

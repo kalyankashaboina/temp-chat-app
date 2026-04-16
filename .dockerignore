@@ -1,10 +1,60 @@
+# Dependencies
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output
 dist
+build
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
 .git
 .gitignore
-Dockerfile.local
-npm-debug.log*
-.vscode
-.husky
+.gitattributes
+
+# Documentation
+README.md
+*.md
+
+# Testing
 coverage
-.env
+.nyc_output
+e2e-results
+test-results
+playwright-report
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+nginx.conf
+
+# Misc
+*.log
+.husky
+.github
+public/mockServiceWorker.js
