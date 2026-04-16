@@ -1,0 +1,300 @@
+import { useCallback, useMemo, useEffect, useRef } from 'react';
+import { useAppSelector, useAppDispatch } from '@/store';
+import { t } from '@/shared/lib/i18n';
+import {
+  sendMessageAsync, retryMessageAsync, retryFileUploadAsync,
+  loadMoreMessagesAsync, processQueueAsync, fetchConversations,
+  fetchMessages, fetchUsers, startNewChatAsync, createGroupAsync,
+  setOnline, setTyping as setTypingAction, setTypingUsers,
+  setShowConversationList as setShowConvListAction,
+  setSearchQuery as setSearchQueryAction,
+  setReplyingTo as setReplyingToAction,
+  setLanguage as setLanguageAction,
+  setActiveConversation as setActiveConvAction,
+  editMessage as editMessageAction,
+  deleteMessage as deleteMessageAction,
+  applyRemoteDelete, applyRemoteEdit,
+  addReaction as addReactionAction,
+  removeReaction as removeReactionAction,
+  applyRemoteReaction,
+  starMessage as starMessageAction,
+  unstarMessage as unstarMessageAction,
+  pinMessage as pinMessageAction,
+  unpinMessage as unpinMessageAction,
+  forwardMessage as forwardMessageAction,
+  markViewOnceAsViewed as markViewOnceAction,
+  startNewChat as startNewChatLocal,
+  createGroup as createGroupLocal,
+  toggleVanishMode as toggleVanishModeAction,
+  muteConversation as muteConvAction,
+  archiveConversation as archiveConvAction,
+  pinConversation as pinConvAction,
+  deleteConversation as deleteConvAction,
+  addCallToHistory as addCallAction,
+  addTypingUser, removeTypingUser, updateUserPresence, setOnlineUsers,
+  addIncomingMessage, updateMessageStatus, confirmMessage, removeVanishedMessage,
+  upsertConversation, setCurrentUserId,
+} from '@/features/chat/chatSlice';
+import { socketClient } from '@/features/chat/services/socketClient';
+import type { Language, Conversation, User, ReplyTo, CallRecord, Message } from '@/features/chat/types';
+import { useAppSelector as useSelector } from '@/store';
+
+export function useChat() {
+  const dispatch = useAppDispatch();
+
+  const activeConversationId = useAppSelector(s => s.chat.activeConversationId);
+  const conversations        = useAppSelector(s => s.chat.conversations);
+  const messagesMap          = useAppSelector(s => s.chat.messagesMap);
+  const isOnline             = useAppSelector(s => s.chat.isOnline);
+  const queue                = useAppSelector(s => s.chat.queue);
+  const language             = useAppSelector(s => s.chat.language);
+  const isTyping             = useAppSelector(s => s.chat.isTyping);
+  const typingUsers          = useAppSelector(s => s.chat.typingUsers);
+  const showConversationList = useAppSelector(s => s.chat.showConversationList);
+  const callHistory          = useAppSelector(s => s.chat.callHistory);
+  const allUsers             = useAppSelector(s => s.chat.allUsers);
+  const searchQuery          = useAppSelector(s => s.chat.searchQuery);
+  const replyingTo           = useAppSelector(s => s.chat.replyingTo);
+  const isProcessingQueue    = useAppSelector(s => s.chat.isProcessingQueue);
+  const isLoadingMore        = useAppSelector(s => s.chat.isLoadingMore);
+  const hasMoreMessagesMap   = useAppSelector(s => s.chat.hasMoreMessages);
+  const currentUserId        = useAppSelector(s => s.chat.currentUserId);
+
+  const authUser  = useAppSelector(s => s.auth.user);
+
+  // Keep currentUserId in sync with auth user
+  useEffect(() => {
+    if (authUser?.id && authUser.id !== currentUserId) {
+      dispatch(setCurrentUserId(authUser.id));
+    }
+  }, [authUser?.id, currentUserId, dispatch]);
+
+  const activeConversation = useMemo(
+    () => conversations.find(c => c.id === activeConversationId) || null,
+    [conversations, activeConversationId],
+  );
+  const messages = useMemo(
+    () => (activeConversationId ? messagesMap[activeConversationId] || [] : []),
+    [activeConversationId, messagesMap],
+  );
+  const pinnedMessages  = useMemo(() => messages.filter(m => m.isPinned), [messages]);
+  const starredMessages = useMemo(() => messages.filter(m => m.isStarred), [messages]);
+  const hasMoreMessages = activeConversationId ? (hasMoreMessagesMap[activeConversationId] ?? true) : false;
+  const lastMessageId   = messages.length > 0 ? messages[messages.length - 1].id : null;
+
+  const currentUser = useMemo(() => ({
+    id: authUser?.id || '',
+    name: authUser?.name || 'You',
+    email: authUser?.email || '',
+    avatar: authUser?.avatar || '',
+    isOnline: true,
+  }), [authUser]);
+
+  const translate = useCallback((key: string) => t(key as Parameters<typeof t>[0], language), [language]);
+
+  // ── Socket event listeners ────────────────────────────────────────────────
+
+  const activeConvIdRef = useRef(activeConversationId);
+  activeConvIdRef.current = activeConversationId;
+  const currentUserIdRef = useRef(currentUserId);
+  currentUserIdRef.current = currentUserId;
+
+  useEffect(() => {
+    const subs = [
+      // Presence
+      socketClient.on('presence:init', (e) => {
+        const payload = e.payload as { onlineUsers: string[] };
+        dispatch(setOnlineUsers(payload.onlineUsers));
+      }),
+      socketClient.on('user:online',  (e) => dispatch(updateUserPresence({ userId: (e.payload as { userId: string }).userId, isOnline: true }))),
+      socketClient.on('user:offline', (e) => dispatch(updateUserPresence({ userId: (e.payload as { userId: string }).userId, isOnline: false }))),
+
+      // Messages
+      socketClient.on('message:new', (e) => {
+        const p = e.payload as {
+          id: string; conversationId: string; senderId: string;
+          content: string; createdAt: string; tempId?: string;
+        };
+        const incoming: Message = {
+          id: p.id, content: p.content, senderId: p.senderId,
+          timestamp: new Date(p.createdAt), status: 'sent',
+          attachments: [], isOwn: p.senderId === currentUserIdRef.current,
+          reactions: [],
+        };
+        if (p.tempId) {
+          dispatch(confirmMessage({ conversationId: p.conversationId, tempId: p.tempId, realId: p.id, createdAt: p.createdAt }));
+        } else {
+          dispatch(addIncomingMessage({ conversationId: p.conversationId, message: incoming }));
+        }
+      }),
+      socketClient.on('message:sent', (e) => {
+        const p = e.payload as { tempId: string; messageId: string; conversationId: string; createdAt: string };
+        dispatch(confirmMessage({ conversationId: p.conversationId, tempId: p.tempId, realId: p.messageId, createdAt: p.createdAt }));
+      }),
+      socketClient.on('message:delivered', (e) => {
+        const p = e.payload as { messageId: string; conversationId: string };
+        if (p.conversationId) dispatch(updateMessageStatus({ conversationId: p.conversationId, messageId: p.messageId, status: 'delivered' }));
+      }),
+      socketClient.on('message:read', (e) => {
+        const p = e.payload as { conversationId: string; messageIds: string[] };
+        p.messageIds?.forEach(mid => dispatch(updateMessageStatus({ conversationId: p.conversationId, messageId: mid, status: 'read' })));
+      }),
+      socketClient.on('message:failed', (e) => {
+        const p = e.payload as { tempId: string };
+        const convId = activeConvIdRef.current;
+        if (convId && p.tempId) dispatch(updateMessageStatus({ conversationId: convId, messageId: p.tempId, status: 'failed' }));
+      }),
+      socketClient.on('message:deleted', (e) => {
+        const p = e.payload as { messageId: string; conversationId: string };
+        dispatch(applyRemoteDelete({ conversationId: p.conversationId, messageId: p.messageId }));
+      }),
+      socketClient.on('message:edited', (e) => {
+        const p = e.payload as { messageId: string; conversationId: string; content: string; editedAt: string };
+        dispatch(applyRemoteEdit({ conversationId: p.conversationId, messageId: p.messageId, content: p.content, editedAt: p.editedAt }));
+      }),
+
+      // Reactions
+      socketClient.on('reaction:added', (e) => {
+        const p = e.payload as { conversationId: string; messageId: string; emoji: string; userId: string; username: string };
+        dispatch(applyRemoteReaction({ ...p, added: true }));
+      }),
+      socketClient.on('reaction:removed', (e) => {
+        const p = e.payload as { conversationId: string; messageId: string; emoji: string; userId: string; username: string };
+        dispatch(applyRemoteReaction({ ...p, added: false }));
+      }),
+
+      // Typing
+      socketClient.on('typing:start', (e) => {
+        const p = e.payload as { conversationId: string; userName: string };
+        if (activeConvIdRef.current === p.conversationId) {
+          dispatch(setTypingAction(true));
+          dispatch(addTypingUser(p.userName));
+        }
+      }),
+      socketClient.on('typing:stop', (e) => {
+        const p = e.payload as { conversationId: string; userName: string };
+        if (activeConvIdRef.current === p.conversationId) {
+          dispatch(removeTypingUser(p.userName));
+        }
+      }),
+
+      // New conversation pushed from server
+      socketClient.on('conversation:new', (e) => {
+        dispatch(upsertConversation(e.payload as Conversation));
+      }),
+    ];
+    return () => subs.forEach(unsub => unsub());
+  }, [dispatch]);
+
+  // Process offline queue when back online
+  useEffect(() => {
+    if (isOnline && queue.length > 0 && !isProcessingQueue) {
+      dispatch(processQueueAsync());
+    }
+  }, [isOnline, queue.length, isProcessingQueue, dispatch]);
+
+  // Browser online/offline
+  useEffect(() => {
+    const on  = () => dispatch(setOnline(true));
+    const off = () => dispatch(setOnline(false));
+    window.addEventListener('online',  on);
+    window.addEventListener('offline', off);
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off); };
+  }, [dispatch]);
+
+  // Vanish timer cleanup
+  const vanishTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  useEffect(() => {
+    if (!activeConversationId) return;
+    (messagesMap[activeConversationId] || []).forEach(msg => {
+      if (msg.isVanish && msg.vanishAt && !vanishTimers.current.has(msg.id)) {
+        const left = new Date(msg.vanishAt).getTime() - Date.now();
+        if (left > 0) {
+          const timer = setTimeout(() => {
+            dispatch(removeVanishedMessage({ conversationId: activeConversationId, messageId: msg.id }));
+            vanishTimers.current.delete(msg.id);
+          }, left);
+          vanishTimers.current.set(msg.id, timer);
+        } else {
+          dispatch(removeVanishedMessage({ conversationId: activeConversationId, messageId: msg.id }));
+        }
+      }
+    });
+  }, [messagesMap, activeConversationId, dispatch]);
+  useEffect(() => () => { vanishTimers.current.forEach(clearTimeout); }, []);
+
+  // Typing debounce
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const setTyping = useCallback((typing: boolean) => {
+    if (!activeConversationId) return;
+    if (typingTimeout.current) clearTimeout(typingTimeout.current);
+    if (typing) {
+      socketClient.typingStart(activeConversationId);
+      typingTimeout.current = setTimeout(() => {
+        socketClient.typingStop(activeConversationId);
+      }, 5000);
+    } else {
+      socketClient.typingStop(activeConversationId);
+      dispatch(setTypingUsers([]));
+    }
+  }, [activeConversationId, dispatch]);
+
+  // ── Action wrappers ───────────────────────────────────────────────────────
+
+  const sendMessage      = useCallback((content: string, files?: File[], options?: { isVanish?: boolean; viewOnce?: boolean }) =>
+    dispatch(sendMessageAsync({ content, files, options })).unwrap(), [dispatch]);
+  const retryMessage     = useCallback((messageId: string) => dispatch(retryMessageAsync(messageId)).unwrap(), [dispatch]);
+  const retryFileUpload  = useCallback((messageId: string, fileId: string) => dispatch(retryFileUploadAsync({ messageId, fileId })).unwrap(), [dispatch]);
+  const editMessageFn    = useCallback((messageId: string, newContent: string) => dispatch(editMessageAction({ messageId, newContent })), [dispatch]);
+  const deleteMessageFn  = useCallback((messageId: string) => dispatch(deleteMessageAction(messageId)), [dispatch]);
+  const addReactionFn    = useCallback((messageId: string, emoji: string) => dispatch(addReactionAction({ messageId, emoji })), [dispatch]);
+  const removeReactionFn = useCallback((messageId: string, emoji: string) => dispatch(removeReactionAction({ messageId, emoji })), [dispatch]);
+  const starMessageFn    = useCallback((messageId: string) => dispatch(starMessageAction(messageId)), [dispatch]);
+  const unstarMessageFn  = useCallback((messageId: string) => dispatch(unstarMessageAction(messageId)), [dispatch]);
+  const pinMessageFn     = useCallback((messageId: string) => dispatch(pinMessageAction(messageId)), [dispatch]);
+  const unpinMessageFn   = useCallback((messageId: string) => dispatch(unpinMessageAction(messageId)), [dispatch]);
+  const forwardMessageFn = useCallback((messageId: string, toConvId: string) => dispatch(forwardMessageAction({ messageId, toConversationId: toConvId })), [dispatch]);
+  const markViewOnce     = useCallback((messageId: string, attachmentId: string) => dispatch(markViewOnceAction({ messageId, attachmentId })), [dispatch]);
+  const loadMoreMessages = useCallback(() => dispatch(loadMoreMessagesAsync()).unwrap(), [dispatch]);
+
+  const setActiveConversation = useCallback((conv: Conversation) => {
+    dispatch(setActiveConvAction(conv.id));
+    // Fetch messages for this conversation
+    dispatch(fetchMessages({ conversationId: conv.id }));
+  }, [dispatch]);
+
+  const startNewChat  = useCallback((user: User) => dispatch(startNewChatAsync(user)), [dispatch]);
+  const createGroupFn = useCallback((name: string, members: User[]) => dispatch(createGroupAsync({ name, members })), [dispatch]);
+
+  const setLanguageFn          = useCallback((lang: Language) => dispatch(setLanguageAction(lang)), [dispatch]);
+  const setShowConversationList = useCallback((show: boolean) => dispatch(setShowConvListAction(show)), [dispatch]);
+  const setSearchQuery          = useCallback((q: string) => dispatch(setSearchQueryAction(q)), [dispatch]);
+  const setReplyingTo           = useCallback((r: ReplyTo | null) => dispatch(setReplyingToAction(r)), [dispatch]);
+  const toggleOnline            = useCallback(() => dispatch(setOnline(!isOnline)), [dispatch, isOnline]);
+  const toggleVanishMode        = useCallback((conversationId: string, enabled: boolean, timer?: number) => dispatch(toggleVanishModeAction({ conversationId, enabled, timer })), [dispatch]);
+  const muteConversation        = useCallback((conversationId: string, muted: boolean) => dispatch(muteConvAction({ conversationId, muted })), [dispatch]);
+  const archiveConversation     = useCallback((conversationId: string, archived: boolean) => dispatch(archiveConvAction({ conversationId, archived })), [dispatch]);
+  const pinConversation         = useCallback((conversationId: string, pinned: boolean) => dispatch(pinConvAction({ conversationId, pinned })), [dispatch]);
+  const deleteConversation      = useCallback((conversationId: string) => dispatch(deleteConvAction(conversationId)), [dispatch]);
+  const addCallToHistory        = useCallback((call: Omit<CallRecord, 'id'>) => dispatch(addCallAction(call)), [dispatch]);
+  const loadUsers               = useCallback((q?: string) => dispatch(fetchUsers(q)), [dispatch]);
+  const loadConversations       = useCallback(() => dispatch(fetchConversations()), [dispatch]);
+
+  return {
+    messages, conversations, activeConversation, isOnline, queue, language,
+    currentUser, isTyping, typingUsers, showConversationList, callHistory,
+    allUsers, searchQuery, replyingTo, isProcessingQueue, pinnedMessages,
+    starredMessages, isLoadingMore, hasMoreMessages, lastMessageId,
+    sendMessage, retryMessage, retryFileUpload,
+    editMessage: editMessageFn, deleteMessage: deleteMessageFn,
+    addReaction: addReactionFn, removeReaction: removeReactionFn,
+    starMessage: starMessageFn, unstarMessage: unstarMessageFn,
+    pinMessage: pinMessageFn, unpinMessage: unpinMessageFn,
+    forwardMessage: forwardMessageFn, markViewOnceAsViewed: markViewOnce,
+    setActiveConversation, toggleOnline, setLanguage: setLanguageFn, translate,
+    setTyping, setShowConversationList, addCallToHistory, startNewChat,
+    setSearchQuery, createGroup: createGroupFn, toggleVanishMode,
+    setReplyingTo, loadMoreMessages, muteConversation, archiveConversation,
+    pinConversation, deleteConversation, loadUsers, loadConversations,
+  };
+}

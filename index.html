@@ -2,68 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
-
-    <title>Relay Chat</title>
-
-    <meta
-      name="description"
-      content="Relay Chat is a modern real-time messaging application with group chats, online presence, and AI-assisted conversations."
-    />
-    <meta name="author" content="Relay Chat" />
-    <meta name="theme-color" content="#1a1a2e" />
-
-    <!-- PWA / iOS support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>ChatApp - Modern Messaging</title>
+    <meta name="description" content="A modern chat application with voice messages, vanish mode, and real-time messaging" />
+    <meta name="author" content="Lovable" />
+    <meta name="theme-color" content="#6366f1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Relay Chat" />
+    <meta name="apple-mobile-web-app-title" content="ChatApp" />
 
-    <!-- ✅ Favicon -->
-    <link rel="icon" type="image/png" href="/relay-fav-icon.png" />
-    <!-- <link rel="icon" href="/favicon.ico" /> -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" />
 
-    <!-- Apple touch icon (iOS home screen) -->
-    <link rel="apple-touch-icon" href="/relay-fav-icon.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/favicon.ico" />
 
-    <!-- NOTE:
-      We intentionally DO NOT link /manifest.json here.
-      vite-plugin-pwa injects the correct manifest automatically.
-    -->
-    <!-- <link rel="manifest" href="/manifest.json" /> -->
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="Relay Chat" />
-    <meta
-      property="og:description"
-      content="A real-time chat application with group messaging, presence, and AI assistance."
-    />
+    <meta property="og:title" content="ChatApp - Modern Messaging" />
+    <meta property="og:description" content="A modern chat application with voice messages, vanish mode, and real-time messaging" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/relay-fav-icon.png" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Relay Chat" />
-    <meta
-      name="twitter:description"
-      content="A real-time chat application with group messaging, presence, and AI assistance."
-    />
-    <meta name="twitter:image" content="/relay-fav-icon.png" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 
     <style>
       /* Prevent overscroll bounce on iOS */
-      html,
-      body {
+      html, body {
         overscroll-behavior: none;
         -webkit-overflow-scrolling: touch;
       }
-
       /* Safe area insets for notched devices */
       body {
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
-          env(safe-area-inset-left);
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
       }
     </style>
   </head>

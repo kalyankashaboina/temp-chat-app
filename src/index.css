@@ -1,7 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
 
 @layer base {
   :root {
@@ -184,6 +185,35 @@
     min-height: 44px;
     min-width: 44px;
   }
+
+  /* Mobile-specific improvements */
+  @media (max-width: 640px) {
+    .touch-target {
+      min-height: 48px;
+      min-width: 48px;
+    }
+  }
+
+  /* Prevent overscroll bounce on iOS */
+  .no-overscroll {
+    overscroll-behavior: contain;
+  }
+
+  /* Hide scrollbar on mobile for cleaner look */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Full height on mobile accounting for address bar */
+  .mobile-full-height {
+    height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
 }
 
 @layer utilities {
@@ -220,8 +250,7 @@
   }
 
   @keyframes pulse {
-    0%,
-    100% {
+    0%, 100% {
       opacity: 1;
     }
     50% {
