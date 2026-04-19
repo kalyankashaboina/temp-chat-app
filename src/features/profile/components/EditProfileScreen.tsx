@@ -29,7 +29,12 @@ const statusOptions = [
 ] as const;
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
@@ -39,7 +44,7 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  
+
   // Form state
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
@@ -110,12 +115,14 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
       });
       // Sync auth store with updated profile
       if (user) {
-        dispatch(setUser({
-          id: user.id,
-          email: user.email,
-          name: updated.name || name.trim(),
-          avatar: updated.avatar || avatarPreview,
-        }));
+        dispatch(
+          setUser({
+            id: user.id,
+            email: user.email,
+            name: updated.name || name.trim(),
+            avatar: updated.avatar || avatarPreview,
+          })
+        );
       }
       toast.success('Profile updated successfully');
       onClose();
@@ -126,22 +133,27 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
     }
   };
 
-  const hasChanges = profile && (
-    name !== profile.name ||
-    username !== profile.username ||
-    bio !== profile.bio ||
-    phone !== (profile.phone || '') ||
-    status !== profile.status ||
-    avatarPreview !== profile.avatar
-  );
+  const hasChanges =
+    profile &&
+    (name !== profile.name ||
+      username !== profile.username ||
+      bio !== profile.bio ||
+      phone !== (profile.phone || '') ||
+      status !== profile.status ||
+      avatarPreview !== profile.avatar);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg w-[95vw] sm:w-full h-[90vh] max-h-[700px] p-0 gap-0 overflow-hidden flex flex-col">
-        <DialogHeader className="p-3 sm:p-4 border-b border-border flex-shrink-0">
+      <DialogContent className="flex h-[90vh] max-h-[700px] w-[95vw] max-w-lg flex-col gap-0 overflow-hidden p-0 sm:w-full">
+        <DialogHeader className="flex-shrink-0 border-b border-border p-3 sm:p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 sm:h-10 sm:w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 sm:h-10 sm:w-10"
+              >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <DialogTitle className="text-base sm:text-lg">Edit Profile</DialogTitle>
@@ -156,14 +168,18 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                 hasChanges && !isSaving ? 'text-primary' : 'text-muted-foreground'
               )}
             >
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {isSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div className="flex-1 space-y-6 overflow-y-auto p-4">
           {isLoading ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex h-full items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
@@ -175,15 +191,15 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                 className="flex flex-col items-center"
               >
                 <div className="relative">
-                  <Avatar className="h-24 w-24 sm:h-28 sm:w-28 border-4 border-background shadow-xl">
+                  <Avatar className="h-24 w-24 border-4 border-background shadow-xl sm:h-28 sm:w-28">
                     <AvatarImage src={avatarPreview} />
-                    <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
+                    <AvatarFallback className="bg-primary text-2xl text-primary-foreground">
                       {getInitials(name || 'User')}
                     </AvatarFallback>
                   </Avatar>
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
+                    className="absolute bottom-0 right-0 rounded-full bg-primary p-2 text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
                   >
                     <Camera className="h-4 w-4" />
                   </button>
@@ -197,7 +213,7 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                 </div>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="mt-3 text-sm text-primary font-medium hover:underline"
+                  className="mt-3 text-sm font-medium text-primary hover:underline"
                 >
                   Change Photo
                 </button>
@@ -211,13 +227,13 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                 className="space-y-2"
               >
                 <Label className="text-sm text-muted-foreground">Status</Label>
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-wrap gap-2">
                   {statusOptions.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => setStatus(option.value)}
                       className={cn(
-                        'flex items-center gap-2 px-3 py-2 rounded-full border-2 transition-all text-sm',
+                        'flex items-center gap-2 rounded-full border-2 px-3 py-2 text-sm transition-all',
                         status === option.value
                           ? 'border-primary bg-primary/10 text-primary'
                           : 'border-border hover:border-primary/50'
@@ -246,7 +262,7 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                     placeholder="Your name"
                     maxLength={50}
                   />
-                  <p className="text-xs text-muted-foreground text-right">{name.length}/50</p>
+                  <p className="text-right text-xs text-muted-foreground">{name.length}/50</p>
                 </div>
 
                 <div className="space-y-2">
@@ -254,7 +270,9 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                   <Input
                     id="username"
                     value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                    onChange={(e) =>
+                      setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))
+                    }
                     placeholder="username"
                     maxLength={30}
                   />
@@ -274,7 +292,7 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                     maxLength={150}
                     className="resize-none"
                   />
-                  <p className="text-xs text-muted-foreground text-right">{bio.length}/150</p>
+                  <p className="text-right text-xs text-muted-foreground">{bio.length}/150</p>
                 </div>
 
                 <div className="space-y-2">
@@ -294,7 +312,7 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 }}
-                className="pt-4 border-t border-border"
+                className="border-t border-border pt-4"
               >
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
@@ -304,7 +322,9 @@ export function EditProfileScreen({ open, onClose }: EditProfileScreenProps) {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Member since</span>
                     <span className="text-foreground">
-                      {profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString() : 'N/A'}
+                      {profile?.createdAt
+                        ? new Date(profile.createdAt).toLocaleDateString()
+                        : 'N/A'}
                     </span>
                   </div>
                 </div>

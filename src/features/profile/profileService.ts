@@ -1,5 +1,11 @@
 import { api } from '@/lib/apiClient';
-import type { UserProfile, PrivacySettings, BlockedUser, StorageStats, FAQItem } from '@/features/profile/types';
+import type {
+  UserProfile,
+  PrivacySettings,
+  BlockedUser,
+  StorageStats,
+  FAQItem,
+} from '@/features/profile/types';
 
 export const profileApi = {
   async getProfile(): Promise<UserProfile> {
@@ -44,8 +50,12 @@ export const profileApi = {
   async getStorageStats(): Promise<StorageStats> {
     // Server doesn't have a storage endpoint — return local estimate
     return {
-      totalSize: 0, mediaSize: 0, documentsSize: 0,
-      cacheSize: 0, messagesCount: 0, mediaCount: 0,
+      totalSize: 0,
+      mediaSize: 0,
+      documentsSize: 0,
+      cacheSize: 0,
+      messagesCount: 0,
+      mediaCount: 0,
     };
   },
 
@@ -53,7 +63,7 @@ export const profileApi = {
     // Clear local caches
     if ('caches' in window) {
       const keys = await caches.keys();
-      await Promise.all(keys.map(k => caches.delete(k)));
+      await Promise.all(keys.map((k) => caches.delete(k)));
     }
   },
 
@@ -62,7 +72,10 @@ export const profileApi = {
     await profileApi.clearCache();
   },
 
-  async changePassword(currentPassword: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
+  async changePassword(
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string }> {
     try {
       await api.post('/auth/change-password', { currentPassword, newPassword });
       return { success: true };
@@ -82,10 +95,30 @@ export const profileApi = {
 
   async getFAQs(): Promise<FAQItem[]> {
     return [
-      { id: '1', question: 'How do I change my profile picture?', answer: 'Go to Settings > Edit Profile and tap on your profile picture.', category: 'Account' },
-      { id: '2', question: 'How do I enable dark mode?', answer: 'Go to Settings > Appearance > Theme and select Dark mode.', category: 'Appearance' },
-      { id: '3', question: 'How can I block someone?', answer: 'Open the chat, tap on the user name, scroll down and tap Block.', category: 'Privacy' },
-      { id: '4', question: 'What is Vanish Mode?', answer: 'Vanish Mode makes messages disappear after they are viewed.', category: 'Features' },
+      {
+        id: '1',
+        question: 'How do I change my profile picture?',
+        answer: 'Go to Settings > Edit Profile and tap on your profile picture.',
+        category: 'Account',
+      },
+      {
+        id: '2',
+        question: 'How do I enable dark mode?',
+        answer: 'Go to Settings > Appearance > Theme and select Dark mode.',
+        category: 'Appearance',
+      },
+      {
+        id: '3',
+        question: 'How can I block someone?',
+        answer: 'Open the chat, tap on the user name, scroll down and tap Block.',
+        category: 'Privacy',
+      },
+      {
+        id: '4',
+        question: 'What is Vanish Mode?',
+        answer: 'Vanish Mode makes messages disappear after they are viewed.',
+        category: 'Features',
+      },
     ];
   },
 

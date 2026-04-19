@@ -1,12 +1,7 @@
 import { MessageReaction } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface ReactionDetailsProps {
   open: boolean;
@@ -16,7 +11,12 @@ interface ReactionDetailsProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -26,13 +26,16 @@ function getAvatarColor(name: string): string {
 
 export function ReactionDetails({ open, onClose, reactions, translate }: ReactionDetailsProps) {
   // Group reactions by emoji
-  const groupedReactions = reactions.reduce((acc, r) => {
-    if (!acc[r.emoji]) {
-      acc[r.emoji] = [];
-    }
-    acc[r.emoji].push(r);
-    return acc;
-  }, {} as Record<string, MessageReaction[]>);
+  const groupedReactions = reactions.reduce(
+    (acc, r) => {
+      if (!acc[r.emoji]) {
+        acc[r.emoji] = [];
+      }
+      acc[r.emoji].push(r);
+      return acc;
+    },
+    {} as Record<string, MessageReaction[]>
+  );
 
   const emojiList = Object.keys(groupedReactions);
 
@@ -46,10 +49,10 @@ export function ReactionDetails({ open, onClose, reactions, translate }: Reactio
         <div className="space-y-4">
           {/* Emoji tabs summary */}
           <div className="flex flex-wrap gap-2 border-b pb-3">
-            {emojiList.map(emoji => (
+            {emojiList.map((emoji) => (
               <div
                 key={emoji}
-                className="flex items-center gap-1 bg-muted rounded-full px-2 py-1 text-sm"
+                className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-sm"
               >
                 <span className="text-base">{emoji}</span>
                 <span className="text-muted-foreground">{groupedReactions[emoji].length}</span>
@@ -58,8 +61,8 @@ export function ReactionDetails({ open, onClose, reactions, translate }: Reactio
           </div>
 
           {/* Users who reacted */}
-          <div className="space-y-3 max-h-64 overflow-y-auto">
-            {emojiList.map(emoji => (
+          <div className="max-h-64 space-y-3 overflow-y-auto">
+            {emojiList.map((emoji) => (
               <div key={emoji} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">{emoji}</span>
@@ -70,10 +73,12 @@ export function ReactionDetails({ open, onClose, reactions, translate }: Reactio
                 <div className="space-y-1 pl-2">
                   {groupedReactions[emoji].map((reaction, idx) => (
                     <div key={idx} className="flex items-center gap-2 py-1">
-                      <div className={cn(
-                        'flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground',
-                        getAvatarColor(reaction.userName)
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold text-primary-foreground',
+                          getAvatarColor(reaction.userName)
+                        )}
+                      >
                         {getInitials(reaction.userName)}
                       </div>
                       <div className="flex-1">

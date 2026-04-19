@@ -10,7 +10,12 @@ interface CallHistoryProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -38,60 +43,69 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
     return (
       <div className="flex h-full items-center justify-center p-8">
         <div className="text-center text-muted-foreground">
-          <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
             <Phone className="h-8 w-8 opacity-50" />
           </div>
           <p className="font-medium">{translate('call.noHistory')}</p>
-          <p className="text-sm mt-1">Your call history will appear here</p>
+          <p className="mt-1 text-sm">Your call history will appear here</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-sidebar">
+    <div className="flex h-full flex-col bg-sidebar">
       <div className="flex items-center gap-2 border-b border-sidebar-border p-4">
         <Phone className="h-5 w-5 text-primary" />
-        <h2 className="text-lg font-semibold text-sidebar-foreground">{translate('call.history')}</h2>
+        <h2 className="text-lg font-semibold text-sidebar-foreground">
+          {translate('call.history')}
+        </h2>
       </div>
-      
+
       <div className="flex-1 overflow-y-auto">
         {calls.map((call) => {
           const CallIcon = call.type === 'video' ? Video : Phone;
-          const DirectionIcon = call.status === 'missed' 
-            ? PhoneMissed 
-            : call.isOutgoing 
-              ? PhoneOutgoing 
-              : PhoneIncoming;
-          
+          const DirectionIcon =
+            call.status === 'missed'
+              ? PhoneMissed
+              : call.isOutgoing
+                ? PhoneOutgoing
+                : PhoneIncoming;
+
           return (
             <div
               key={call.id}
-              className="flex items-center gap-3 p-4 border-b border-sidebar-border hover:bg-secondary/50 transition-colors cursor-pointer group"
+              className="group flex cursor-pointer items-center gap-3 border-b border-sidebar-border p-4 transition-colors hover:bg-secondary/50"
               onClick={() => onCallBack(call.user, call.type)}
             >
               {/* Avatar */}
               <div className="relative">
-                <div className={cn(
-                  'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
-                  getAvatarColor(call.user.name)
-                )}>
+                <div
+                  className={cn(
+                    'flex h-12 w-12 items-center justify-center rounded-full text-sm font-semibold text-white',
+                    getAvatarColor(call.user.name)
+                  )}
+                >
                   {getInitials(call.user.name)}
                 </div>
               </div>
 
               {/* Call info */}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">{call.user.name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium text-foreground">{call.user.name}</p>
                 <div className="flex items-center gap-1.5 text-sm">
-                  <DirectionIcon className={cn(
-                    'h-3.5 w-3.5',
-                    call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
-                  )} />
-                  <span className={cn(
-                    call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
-                  )}>
-                    {call.status === 'completed' && call.duration > 0 
+                  <DirectionIcon
+                    className={cn(
+                      'h-3.5 w-3.5',
+                      call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      call.status === 'missed' ? 'text-destructive' : 'text-muted-foreground'
+                    )}
+                  >
+                    {call.status === 'completed' && call.duration > 0
                       ? formatDuration(call.duration)
                       : translate(`call.${call.status}`)}
                   </span>
@@ -103,7 +117,7 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
                 <span className="text-xs text-muted-foreground">
                   {formatCallTime(call.timestamp)}
                 </span>
-                <div className="p-2 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                <div className="rounded-full bg-primary/10 p-2 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <CallIcon className="h-4 w-4" />
                 </div>
               </div>

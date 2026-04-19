@@ -2,12 +2,7 @@ import { useState } from 'react';
 import { User } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
 import { X, Users, Check, Search } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -20,7 +15,12 @@ interface CreateGroupModalProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -28,21 +28,26 @@ function getAvatarColor(name: string): string {
   return colors[name.charCodeAt(0) % colors.length];
 }
 
-export function CreateGroupModal({ open, onClose, users, onCreateGroup, translate }: CreateGroupModalProps) {
+export function CreateGroupModal({
+  open,
+  onClose,
+  users,
+  onCreateGroup,
+  translate,
+}: CreateGroupModalProps) {
   const [groupName, setGroupName] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const toggleUser = (user: User) => {
-    setSelectedUsers(prev =>
-      prev.some(u => u.id === user.id)
-        ? prev.filter(u => u.id !== user.id)
-        : [...prev, user]
+    setSelectedUsers((prev) =>
+      prev.some((u) => u.id === user.id) ? prev.filter((u) => u.id !== user.id) : [...prev, user]
     );
   };
 
@@ -68,7 +73,7 @@ export function CreateGroupModal({ open, onClose, users, onCreateGroup, translat
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
               <Users className="h-4 w-4 text-primary" />
             </div>
             {translate('group.create')}
@@ -92,15 +97,15 @@ export function CreateGroupModal({ open, onClose, users, onCreateGroup, translat
           {/* Selected Users */}
           {selectedUsers.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {selectedUsers.map(user => (
+              {selectedUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center gap-1.5 bg-primary/10 text-primary rounded-full px-2.5 py-1 text-sm"
+                  className="flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-sm text-primary"
                 >
                   <span>{user.name.split(' ')[0]}</span>
                   <button
                     onClick={() => toggleUser(user)}
-                    className="ml-0.5 hover:text-destructive transition-colors"
+                    className="ml-0.5 transition-colors hover:text-destructive"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -111,7 +116,7 @@ export function CreateGroupModal({ open, onClose, users, onCreateGroup, translat
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -121,37 +126,41 @@ export function CreateGroupModal({ open, onClose, users, onCreateGroup, translat
           </div>
 
           {/* User List */}
-          <div className="max-h-60 overflow-y-auto space-y-1 rounded-lg border border-border p-1">
+          <div className="max-h-60 space-y-1 overflow-y-auto rounded-lg border border-border p-1">
             {filteredUsers.length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground text-sm">
-                No users found
-              </div>
+              <div className="py-8 text-center text-sm text-muted-foreground">No users found</div>
             ) : (
-              filteredUsers.map(user => {
-                const isSelected = selectedUsers.some(u => u.id === user.id);
+              filteredUsers.map((user) => {
+                const isSelected = selectedUsers.some((u) => u.id === user.id);
                 return (
                   <button
                     key={user.id}
                     onClick={() => toggleUser(user)}
                     className={cn(
-                      'w-full flex items-center gap-3 p-2.5 rounded-lg transition-all',
-                      isSelected ? 'bg-primary/10 border border-primary/20' : 'hover:bg-muted border border-transparent'
+                      'flex w-full items-center gap-3 rounded-lg p-2.5 transition-all',
+                      isSelected
+                        ? 'border border-primary/20 bg-primary/10'
+                        : 'border border-transparent hover:bg-muted'
                     )}
                   >
-                    <div className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
-                      getAvatarColor(user.name)
-                    )}>
+                    <div
+                      className={cn(
+                        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
+                        getAvatarColor(user.name)
+                      )}
+                    >
                       {getInitials(user.name)}
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-medium text-sm">{user.name}</p>
+                      <p className="text-sm font-medium">{user.name}</p>
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
-                    <div className={cn(
-                      'h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all',
-                      isSelected ? 'bg-primary border-primary' : 'border-muted-foreground/30'
-                    )}>
+                    <div
+                      className={cn(
+                        'flex h-5 w-5 items-center justify-center rounded-full border-2 transition-all',
+                        isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
+                      )}
+                    >
                       {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
                     </div>
                   </button>
@@ -174,7 +183,7 @@ export function CreateGroupModal({ open, onClose, users, onCreateGroup, translat
             </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground text-center">
+          <p className="text-center text-xs text-muted-foreground">
             {translate('group.minMembers')}
           </p>
         </div>

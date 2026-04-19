@@ -59,7 +59,7 @@ export function SettingsBottomSheet<T extends string>({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50"
+            className="fixed inset-0 z-50 bg-black/60"
             onClick={handleCancel}
           />
 
@@ -69,15 +69,15 @@ export function SettingsBottomSheet<T extends string>({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-3xl max-h-[80vh] overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-50 max-h-[80vh] overflow-hidden rounded-t-3xl bg-background"
           >
             {/* Handle */}
-            <div className="flex justify-center pt-3 pb-2">
-              <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+            <div className="flex justify-center pb-2 pt-3">
+              <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
             </div>
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 pb-4 border-b border-border">
+            <div className="flex items-center justify-between border-b border-border px-4 pb-4">
               <Button
                 variant="ghost"
                 size="sm"
@@ -97,42 +97,42 @@ export function SettingsBottomSheet<T extends string>({
                   hasChanged && !isLoading ? 'text-primary' : 'text-muted-foreground'
                 )}
               >
-                {isLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  'Done'
-                )}
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Done'}
               </Button>
             </div>
 
             {/* Options */}
-            <div className="overflow-y-auto max-h-[60vh] p-4">
+            <div className="max-h-[60vh] overflow-y-auto p-4">
               <div className="space-y-2">
                 {options.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => setSelectedValue(option.value)}
                     className={cn(
-                      'w-full flex items-center justify-between p-4 rounded-xl transition-all',
+                      'flex w-full items-center justify-between rounded-xl p-4 transition-all',
                       selectedValue === option.value
-                        ? 'bg-primary/10 border-2 border-primary'
-                        : 'bg-card border-2 border-transparent hover:bg-muted/50'
+                        ? 'border-2 border-primary bg-primary/10'
+                        : 'border-2 border-transparent bg-card hover:bg-muted/50'
                     )}
                   >
                     <div className="flex items-center gap-3">
                       {option.icon && (
-                        <div className={cn(
-                          'p-2 rounded-lg',
-                          selectedValue === option.value ? 'bg-primary/20' : 'bg-muted'
-                        )}>
+                        <div
+                          className={cn(
+                            'rounded-lg p-2',
+                            selectedValue === option.value ? 'bg-primary/20' : 'bg-muted'
+                          )}
+                        >
                           {option.icon}
                         </div>
                       )}
                       <div className="text-left">
-                        <p className={cn(
-                          'font-medium',
-                          selectedValue === option.value ? 'text-primary' : 'text-foreground'
-                        )}>
+                        <p
+                          className={cn(
+                            'font-medium',
+                            selectedValue === option.value ? 'text-primary' : 'text-foreground'
+                          )}
+                        >
                           {option.label}
                         </p>
                         {option.description && (
@@ -140,9 +140,7 @@ export function SettingsBottomSheet<T extends string>({
                         )}
                       </div>
                     </div>
-                    {selectedValue === option.value && (
-                      <Check className="h-5 w-5 text-primary" />
-                    )}
+                    {selectedValue === option.value && <Check className="h-5 w-5 text-primary" />}
                   </button>
                 ))}
               </div>

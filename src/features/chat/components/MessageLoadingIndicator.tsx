@@ -13,7 +13,7 @@ export function MessageLoadingIndicator({ translate }: MessageLoadingIndicatorPr
       exit={{ opacity: 0, y: -10 }}
       className="flex items-center justify-center py-3"
     >
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-muted/50 text-muted-foreground text-sm">
+      <div className="flex items-center gap-2 rounded-full bg-muted/50 px-4 py-2 text-sm text-muted-foreground">
         <Loader2 className="h-4 w-4 animate-spin" />
         <span>{translate('messages.loadingMore')}</span>
       </div>

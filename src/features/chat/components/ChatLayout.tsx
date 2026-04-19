@@ -21,14 +21,14 @@ import { Button } from '@/components/ui/button';
 type TabType = 'chats' | 'calls' | 'users';
 
 function ChatContent() {
-  const { 
-    showConversationList, 
+  const {
+    showConversationList,
     setShowConversationList,
-    callHistory, 
-    allUsers, 
-    conversations, 
+    callHistory,
+    allUsers,
+    conversations,
     activeConversation,
-    startNewChat, 
+    startNewChat,
     translate,
     isOnline,
     queue,
@@ -72,12 +72,24 @@ function ChatContent() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [showConversationList, setShowConversationList, activeConversation]);
 
-  const existingUserIds = conversations.filter(c => !c.isGroup && c.user).map(c => c.user!.id);
-  const handleCallBack = (_call: unknown) => { /* call callback */ };
+  const existingUserIds = conversations.filter((c) => !c.isGroup && c.user).map((c) => c.user!.id);
+  const handleCallBack = (_call: unknown) => {
+    /* call callback */
+  };
 
   const tabs = [
-    { id: 'chats' as const, label: translate('tabs.chats'), icon: MessageSquare, count: conversations.reduce((acc, c) => acc + c.unreadCount, 0) },
-    { id: 'calls' as const, label: translate('tabs.calls'), icon: Phone, count: callHistory.filter(c => c.status === 'missed').length },
+    {
+      id: 'chats' as const,
+      label: translate('tabs.chats'),
+      icon: MessageSquare,
+      count: conversations.reduce((acc, c) => acc + c.unreadCount, 0),
+    },
+    {
+      id: 'calls' as const,
+      label: translate('tabs.calls'),
+      icon: Phone,
+      count: callHistory.filter((c) => c.status === 'missed').length,
+    },
     { id: 'users' as const, label: translate('tabs.users'), icon: UserPlus },
   ];
 
@@ -86,54 +98,51 @@ function ChatContent() {
   const showChatWindow = !showConversationList && activeConversation;
 
   return (
-    <div 
-      className="flex h-[100dvh] flex-col overflow-hidden bg-background"
-      {...swipeHandlers}
-    >
+    <div className="flex h-[100dvh] flex-col overflow-hidden bg-background" {...swipeHandlers}>
       {/* Global online status indicator */}
-      <OnlineStatusIndicator 
+      <OnlineStatusIndicator
         isOnline={isOnline}
         queueCount={queue.length}
         isProcessing={isProcessingQueue}
         translate={translate}
       />
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="relative flex flex-1 overflow-hidden">
         {/* Sidebar - Always visible on desktop, conditionally on mobile */}
         <div
           className={cn(
-            'flex-shrink-0 border-r border-border flex flex-col bg-card',
+            'flex flex-shrink-0 flex-col border-r border-border bg-card',
             // Desktop: always visible with fixed width
-            'md:relative md:w-80 lg:w-96 md:translate-x-0 md:opacity-100',
+            'md:relative md:w-80 md:translate-x-0 md:opacity-100 lg:w-96',
             // Mobile: full width, slide in/out based on state
-            'absolute md:relative inset-0 z-30 w-full transition-transform duration-300 ease-out',
+            'absolute inset-0 z-30 w-full transition-transform duration-300 ease-out md:relative',
             // Mobile visibility
             showSidebar ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
           )}
         >
           {/* Tabs header */}
-          <div className="flex items-center border-b border-border bg-card flex-shrink-0 safe-top">
+          <div className="safe-top flex flex-shrink-0 items-center border-b border-border bg-card">
             <div className="flex flex-1">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
-                  <button 
-                    key={tab.id} 
-                    onClick={() => setActiveTab(tab.id)} 
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
                     className={cn(
-                      'flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-medium transition-all relative touch-target',
-                      activeTab === tab.id 
-                        ? 'text-primary border-b-2 border-primary bg-primary/5' 
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted'
+                      'touch-target relative flex flex-1 items-center justify-center gap-1.5 py-3.5 text-sm font-medium transition-all',
+                      activeTab === tab.id
+                        ? 'border-b-2 border-primary bg-primary/5 text-primary'
+                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground active:bg-muted'
                     )}
                   >
                     <Icon className="h-4 w-4" />
-                    <span className="hidden xs:inline sm:inline">{tab.label}</span>
+                    <span className="xs:inline hidden sm:inline">{tab.label}</span>
                     {tab.count !== undefined && tab.count > 0 && (
-                      <motion.span 
+                      <motion.span
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="absolute top-2 right-2 sm:static sm:ml-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground px-1"
+                        className="absolute right-2 top-2 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground sm:static sm:ml-1"
                       >
                         {tab.count > 99 ? '99+' : tab.count}
                       </motion.span>
@@ -142,7 +151,7 @@ function ChatContent() {
                 );
               })}
             </div>
-            
+
             {/* Settings button */}
             <Button
               variant="ghost"
@@ -153,7 +162,7 @@ function ChatContent() {
               <Settings className="h-5 w-5" />
             </Button>
           </div>
-          
+
           {/* Tab content */}
           <div className="flex-1 overflow-hidden">
             <AnimatePresence mode="wait">
@@ -176,7 +185,11 @@ function ChatContent() {
                   exit={{ opacity: 0, x: 20 }}
                   className="h-full"
                 >
-                  <CallHistory calls={callHistory} onCallBack={handleCallBack} translate={translate} />
+                  <CallHistory
+                    calls={callHistory}
+                    onCallBack={handleCallBack}
+                    translate={translate}
+                  />
                 </motion.div>
               )}
               {activeTab === 'users' && (
@@ -187,17 +200,22 @@ function ChatContent() {
                   exit={{ opacity: 0, x: 20 }}
                   className="h-full"
                 >
-                  <UsersList users={allUsers} existingConversationUserIds={existingUserIds} onStartChat={startNewChat} translate={translate} />
+                  <UsersList
+                    users={allUsers}
+                    existingConversationUserIds={existingUserIds}
+                    onStartChat={startNewChat}
+                    translate={translate}
+                  />
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </div>
-        
+
         {/* Main chat area */}
-        <div 
+        <div
           className={cn(
-            'flex-1 flex flex-col min-w-0',
+            'flex min-w-0 flex-1 flex-col',
             // On mobile: hide when sidebar is showing
             !showChatWindow && 'hidden md:flex'
           )}
@@ -205,10 +223,10 @@ function ChatContent() {
           <ChatWindow onOpenMediaGallery={() => setShowMediaGallery(true)} />
         </div>
       </div>
-      
+
       {/* Notification prompt */}
       <NotificationPrompt translate={translate} />
-      
+
       {/* AI Chat floating button */}
       <AIChat translate={translate} />
 

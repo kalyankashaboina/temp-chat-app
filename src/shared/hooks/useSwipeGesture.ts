@@ -45,12 +45,12 @@ export function useSwipeGesture(handlers: SwipeHandlers) {
     const touch = e.touches[0];
     const deltaX = touch.clientX - stateRef.current.startX;
     const deltaY = touch.clientY - stateRef.current.startY;
-    setSwipeState(prev => ({ ...prev, deltaX, deltaY }));
+    setSwipeState((prev) => ({ ...prev, deltaX, deltaY }));
   }, []);
 
   const handleTouchEnd = useCallback(() => {
     const { deltaX, deltaY, isSwiping } = stateRef.current;
-    
+
     if (!isSwiping) return;
 
     const absX = Math.abs(deltaX);

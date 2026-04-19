@@ -2,18 +2,18 @@ import { useState } from 'react';
 import { Conversation, Message } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
 import { Forward, Users, Search, Check } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -30,18 +30,18 @@ interface ForwardMessageModalProps {
   translate: (key: string) => string;
 }
 
-export function ForwardMessageModal({ 
-  open, 
-  onClose, 
-  message, 
-  conversations, 
+export function ForwardMessageModal({
+  open,
+  onClose,
+  message,
+  conversations,
   onForward,
-  translate 
+  translate,
 }: ForwardMessageModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
 
-  const filteredConversations = conversations.filter(conv => {
+  const filteredConversations = conversations.filter((conv) => {
     const name = conv.isGroup ? conv.groupName : conv.user?.name;
     return name?.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -73,8 +73,8 @@ export function ForwardMessageModal({
 
         {/* Message preview */}
         {message && (
-          <div className="p-3 rounded-lg bg-muted/50 border border-border">
-            <p className="text-sm text-muted-foreground line-clamp-3">
+          <div className="rounded-lg border border-border bg-muted/50 p-3">
+            <p className="line-clamp-3 text-sm text-muted-foreground">
               {message.content || (message.attachments.length > 0 ? '📎 Attachment' : '')}
             </p>
           </div>
@@ -82,7 +82,7 @@ export function ForwardMessageModal({
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -92,7 +92,7 @@ export function ForwardMessageModal({
         </div>
 
         {/* Conversation list */}
-        <ScrollArea className="h-[300px] -mx-6 px-6">
+        <ScrollArea className="-mx-6 h-[300px] px-6">
           <div className="space-y-1">
             {filteredConversations.map((conv) => {
               const displayName = conv.isGroup ? conv.groupName : conv.user?.name || 'Unknown';
@@ -103,10 +103,10 @@ export function ForwardMessageModal({
                   key={conv.id}
                   onClick={() => setSelectedConversation(conv.id)}
                   className={cn(
-                    'w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200',
-                    isSelected 
-                      ? 'bg-primary/10 border border-primary/30 ring-1 ring-primary/20' 
-                      : 'hover:bg-secondary border border-transparent'
+                    'flex w-full items-center gap-3 rounded-xl p-3 transition-all duration-200',
+                    isSelected
+                      ? 'border border-primary/30 bg-primary/10 ring-1 ring-primary/20'
+                      : 'border border-transparent hover:bg-secondary'
                   )}
                 >
                   <div className="relative">
@@ -115,17 +115,19 @@ export function ForwardMessageModal({
                         <Users className="h-4 w-4" />
                       </div>
                     ) : (
-                      <div className={cn(
-                        'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
-                        getAvatarColor(displayName)
-                      )}>
+                      <div
+                        className={cn(
+                          'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
+                          getAvatarColor(displayName)
+                        )}
+                      >
                         {getInitials(displayName)}
                       </div>
                     )}
                   </div>
-                  <span className="flex-1 text-left font-medium truncate">{displayName}</span>
+                  <span className="flex-1 truncate text-left font-medium">{displayName}</span>
                   {isSelected && (
-                    <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary">
                       <Check className="h-4 w-4 text-primary-foreground" />
                     </div>
                   )}
@@ -140,11 +142,7 @@ export function ForwardMessageModal({
           <Button variant="outline" onClick={handleClose}>
             {translate('action.cancel')}
           </Button>
-          <Button 
-            onClick={handleForward} 
-            disabled={!selectedConversation}
-            className="gap-2"
-          >
+          <Button onClick={handleForward} disabled={!selectedConversation} className="gap-2">
             <Forward className="h-4 w-4" />
             {translate('action.forward')}
           </Button>

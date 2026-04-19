@@ -27,7 +27,10 @@ function mapUser(u: MeResponse): AuthUser {
 export const authService = {
   async login(email: string, password: string): Promise<AuthResult> {
     try {
-      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/login', { email, password });
+      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/login', {
+        email,
+        password,
+      });
       return { success: true, user: mapUser(res.data) };
     } catch (err: unknown) {
       return { success: false, error: (err as Error).message };
@@ -36,7 +39,11 @@ export const authService = {
 
   async register(name: string, email: string, password: string): Promise<AuthResult> {
     try {
-      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/register', { username: name, email, password });
+      const res = await api.post<{ success: boolean; data: MeResponse }>('/auth/register', {
+        username: name,
+        email,
+        password,
+      });
       return { success: true, user: mapUser(res.data) };
     } catch (err: unknown) {
       return { success: false, error: (err as Error).message };

@@ -4,12 +4,7 @@ import { Star, X, MessageSquare, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 interface StarredMessagesProps {
   open: boolean;
@@ -35,10 +30,10 @@ export function StarredMessages({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0">
-        <SheetHeader className="p-4 border-b border-border">
+      <SheetContent side="right" className="w-full p-0 sm:max-w-md">
+        <SheetHeader className="border-b border-border p-4">
           <SheetTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-amber-500 fill-amber-500" />
+            <Star className="h-5 w-5 fill-amber-500 text-amber-500" />
             {translate('starred.title')}
           </SheetTitle>
         </SheetHeader>
@@ -48,13 +43,13 @@ export function StarredMessages({
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col items-center justify-center h-64 text-center"
+              className="flex h-64 flex-col items-center justify-center text-center"
             >
-              <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
                 <Star className="h-8 w-8 text-muted-foreground/50" />
               </div>
-              <h3 className="font-medium text-foreground mb-1">{translate('starred.empty')}</h3>
-              <p className="text-sm text-muted-foreground max-w-[200px]">
+              <h3 className="mb-1 font-medium text-foreground">{translate('starred.empty')}</h3>
+              <p className="max-w-[200px] text-sm text-muted-foreground">
                 {translate('starred.emptyDescription')}
               </p>
             </motion.div>
@@ -68,19 +63,22 @@ export function StarredMessages({
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group relative rounded-xl border border-border bg-card p-3 hover:shadow-md transition-all"
+                    className="group relative rounded-xl border border-border bg-card p-3 transition-all hover:shadow-md"
                   >
                     {/* Star badge */}
-                    <div className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-amber-500 flex items-center justify-center shadow-lg">
-                      <Star className="h-3 w-3 text-white fill-white" />
+                    <div className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 shadow-lg">
+                      <Star className="h-3 w-3 fill-white text-white" />
                     </div>
 
                     {/* Message content */}
                     <div className="pr-8">
-                      <p className="text-sm text-foreground line-clamp-3 mb-2">
-                        {message.content || (message.attachments.length > 0 ? `📎 ${message.attachments.length} attachment(s)` : 'No content')}
+                      <p className="mb-2 line-clamp-3 text-sm text-foreground">
+                        {message.content ||
+                          (message.attachments.length > 0
+                            ? `📎 ${message.attachments.length} attachment(s)`
+                            : 'No content')}
                       </p>
-                      
+
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
                         <span>{message.isOwn ? 'You' : 'User'}</span>
                         <span>{format(message.timestamp, 'MMM d, HH:mm')}</span>
@@ -88,7 +86,7 @@ export function StarredMessages({
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
+                    <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -97,7 +95,7 @@ export function StarredMessages({
                       >
                         <MessageSquare className="h-3.5 w-3.5" />
                         {translate('starred.goToMessage')}
-                        <ArrowRight className="h-3 w-3 ml-auto" />
+                        <ArrowRight className="ml-auto h-3 w-3" />
                       </Button>
                       <Button
                         variant="ghost"
@@ -136,7 +134,7 @@ export function StarButton({ isStarred, onToggle, className }: StarButtonProps) 
         'flex h-7 w-7 items-center justify-center rounded-full transition-colors',
         isStarred
           ? 'bg-amber-500/20 text-amber-500'
-          : 'bg-card border border-border shadow-sm hover:bg-muted text-muted-foreground',
+          : 'border border-border bg-card text-muted-foreground shadow-sm hover:bg-muted',
         className
       )}
     >

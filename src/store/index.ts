@@ -21,16 +21,27 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [
-          'chat/addOwnMessage', 'chat/addIncomingMessage', 'chat/updateMessageStatus',
-          'chat/sendMessageAsync/fulfilled', 'chat/sendMessageAsync/pending',
-          'chat/retryMessageAsync/fulfilled', 'chat/loadMoreMessagesAsync/fulfilled',
-          'chat/enqueueItem', 'chat/addCallToHistory',
+          'chat/addOwnMessage',
+          'chat/addIncomingMessage',
+          'chat/updateMessageStatus',
+          'chat/sendMessageAsync/fulfilled',
+          'chat/sendMessageAsync/pending',
+          'chat/retryMessageAsync/fulfilled',
+          'chat/loadMoreMessagesAsync/fulfilled',
+          'chat/enqueueItem',
+          'chat/addCallToHistory',
         ],
-        ignoredPaths: ['chat.messagesMap', 'chat.conversations', 'chat.queue', 'chat.callHistory', 'chat.replyingTo'],
+        ignoredPaths: [
+          'chat.messagesMap',
+          'chat.conversations',
+          'chat.queue',
+          'chat.callHistory',
+          'chat.replyingTo',
+        ],
       },
     })
-    // Add RTK Query middleware for caching, invalidation, polling, etc.
-    .concat(api.middleware),
+      // Add RTK Query middleware for caching, invalidation, polling, etc.
+      .concat(api.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

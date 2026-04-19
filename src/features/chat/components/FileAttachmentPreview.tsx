@@ -50,7 +50,7 @@ export function FileAttachmentPreview({
     >
       {/* Image preview */}
       {attachment.type === 'image' && (
-        <div className="mb-2 relative overflow-hidden rounded-md">
+        <div className="relative mb-2 overflow-hidden rounded-md">
           <img
             src={attachment.url}
             alt={attachment.name}
@@ -62,8 +62,8 @@ export function FileAttachmentPreview({
           {attachment.uploadStatus === 'pending' && attachment.uploadProgress > 0 && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/50">
               <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
-                <span className="text-sm font-medium mt-2">
+                <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                <span className="mt-2 text-sm font-medium">
                   {Math.round(attachment.uploadProgress)}%
                 </span>
               </div>
@@ -83,12 +83,14 @@ export function FileAttachmentPreview({
           <Icon className="h-5 w-5" />
         </div>
 
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{attachment.name}</p>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{attachment.name}</p>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <span>{formatFileSize(attachment.size)}</span>
             <span>•</span>
-            <span className="capitalize">{translate(`file.${attachment.type}` as Parameters<typeof translate>[0])}</span>
+            <span className="capitalize">
+              {translate(`file.${attachment.type}` as Parameters<typeof translate>[0])}
+            </span>
           </div>
         </div>
 
@@ -110,7 +112,7 @@ export function FileAttachmentPreview({
           {attachment.uploadStatus === 'failed' && (
             <button
               onClick={handleRetry}
-              className="flex items-center gap-1 text-destructive hover:text-destructive/80 transition-colors"
+              className="flex items-center gap-1 text-destructive transition-colors hover:text-destructive/80"
             >
               <AlertCircle className="h-4 w-4" />
               <RefreshCw className="h-3 w-3" />

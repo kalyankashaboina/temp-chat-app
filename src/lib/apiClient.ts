@@ -2,20 +2,20 @@
 import { API_BASE_URL } from '@/config';
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(
+    public status: number,
+    message: string
+  ) {
     super(message);
     this.name = 'ApiError';
   }
 }
 
-async function request<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${path}`;
   const res = await fetch(url, {
     ...options,
-    credentials: 'include',           // send cookie every request
+    credentials: 'include', // send cookie every request
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
@@ -39,12 +39,10 @@ async function request<T>(
 }
 
 export const api = {
-  get:    <T>(path: string, opts?: RequestInit) =>
-    request<T>(path, { method: 'GET', ...opts }),
-  post:   <T>(path: string, body?: unknown, opts?: RequestInit) =>
-    request<T>(path, { method: 'POST',  body: JSON.stringify(body), ...opts }),
-  put:    <T>(path: string, body?: unknown, opts?: RequestInit) =>
-    request<T>(path, { method: 'PUT',   body: JSON.stringify(body), ...opts }),
-  delete: <T>(path: string, opts?: RequestInit) =>
-    request<T>(path, { method: 'DELETE', ...opts }),
+  get: <T>(path: string, opts?: RequestInit) => request<T>(path, { method: 'GET', ...opts }),
+  post: <T>(path: string, body?: unknown, opts?: RequestInit) =>
+    request<T>(path, { method: 'POST', body: JSON.stringify(body), ...opts }),
+  put: <T>(path: string, body?: unknown, opts?: RequestInit) =>
+    request<T>(path, { method: 'PUT', body: JSON.stringify(body), ...opts }),
+  delete: <T>(path: string, opts?: RequestInit) => request<T>(path, { method: 'DELETE', ...opts }),
 };

@@ -19,7 +19,7 @@ export function ConnectionStatus({ className }: ConnectionStatusProps) {
       if (event.payload.latency) {
         setLatency(Math.round(event.payload.latency));
       }
-      
+
       // Show status briefly when it changes
       setShowStatus(true);
       setTimeout(() => setShowStatus(false), 3000);
@@ -43,10 +43,10 @@ export function ConnectionStatus({ className }: ConnectionStatusProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           className={cn(
-            'fixed top-2 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium shadow-lg',
-            isConnected 
-              ? 'bg-primary/20 text-primary border border-primary/30' 
-              : 'bg-destructive/20 text-destructive border border-destructive/30',
+            'fixed left-1/2 top-2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg',
+            isConnected
+              ? 'border border-primary/30 bg-primary/20 text-primary'
+              : 'border border-destructive/30 bg-destructive/20 text-destructive',
             className
           )}
         >
@@ -54,11 +54,7 @@ export function ConnectionStatus({ className }: ConnectionStatusProps) {
             <>
               <Signal className={cn('h-3 w-3', getLatencyColor())} />
               <span>Connected</span>
-              {latency && (
-                <span className={cn('opacity-70', getLatencyColor())}>
-                  {latency}ms
-                </span>
-              )}
+              {latency && <span className={cn('opacity-70', getLatencyColor())}>{latency}ms</span>}
             </>
           ) : (
             <>

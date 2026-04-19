@@ -1,13 +1,12 @@
-# Ignore build output
-dist/
-build/
-node_modules/
-
-# Ignore generated files
-*.log
-*.lock
-
-# Ignore environment files
+node_modules
+dist
+build
+coverage
+*.min.js
+*.min.css
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
 .env
 .env.local
 .env.*.local

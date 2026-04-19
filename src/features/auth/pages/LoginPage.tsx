@@ -17,11 +17,11 @@ export default function LoginPage() {
   const [login, { isLoading }] = useLoginMutation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const language = useAppSelector(state => state.settings?.language || 'en');
+  const language = useAppSelector((state) => state.settings?.language || 'en');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Zod validation
     const parsed = loginSchema.safeParse({ email, password });
     if (!parsed.success) {
@@ -30,14 +30,14 @@ export default function LoginPage() {
     }
 
     try {
-      const result = await login({ 
-        email: parsed.data.email, 
-        password: parsed.data.password 
+      const result = await login({
+        email: parsed.data.email,
+        password: parsed.data.password,
       }).unwrap();
-      
+
       // Update Redux state with user data
       dispatch(setUser(result.data));
-      
+
       toast.success('Welcome back!');
       navigate('/');
     } catch (error: any) {
@@ -57,9 +57,7 @@ export default function LoginPage() {
           <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
             {t('auth.welcome', language)}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('auth.loginSubtitle', language)}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('auth.loginSubtitle', language)}</p>
         </div>
 
         {/* Form */}
@@ -107,18 +105,13 @@ export default function LoginPage() {
           <div className="flex items-center justify-end">
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+              className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
             >
               {t('action.forgotPassword', language)}
             </Link>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -135,8 +128,9 @@ export default function LoginPage() {
 
         {/* Demo credentials hint */}
         <div className="rounded-lg border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground text-center">
-            Demo credentials: <span className="font-mono text-foreground">demo@example.com</span> / <span className="font-mono text-foreground">password123</span>
+          <p className="text-center text-xs text-muted-foreground">
+            Demo credentials: <span className="font-mono text-foreground">demo@example.com</span> /{' '}
+            <span className="font-mono text-foreground">password123</span>
           </p>
         </div>
 
@@ -145,7 +139,7 @@ export default function LoginPage() {
           {t('auth.noAccount', language)}{' '}
           <Link
             to="/register"
-            className="font-medium text-primary hover:text-primary/80 transition-colors"
+            className="font-medium text-primary transition-colors hover:text-primary/80"
           >
             {t('action.createAccount', language)}
           </Link>

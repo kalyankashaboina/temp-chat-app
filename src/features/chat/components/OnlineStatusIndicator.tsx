@@ -9,11 +9,11 @@ interface OnlineStatusIndicatorProps {
   translate: (key: string) => string;
 }
 
-export function OnlineStatusIndicator({ 
-  isOnline, 
-  queueCount = 0, 
+export function OnlineStatusIndicator({
+  isOnline,
+  queueCount = 0,
   isProcessing = false,
-  translate 
+  translate,
 }: OnlineStatusIndicatorProps) {
   return (
     <AnimatePresence mode="wait">
@@ -23,13 +23,13 @@ export function OnlineStatusIndicator({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed top-0 left-0 right-0 z-50 safe-top"
+          className="safe-top fixed left-0 right-0 top-0 z-50"
         >
-          <div className="flex items-center justify-center gap-2 py-2 px-4 bg-destructive/90 text-destructive-foreground text-sm font-medium backdrop-blur-sm">
+          <div className="flex items-center justify-center gap-2 bg-destructive/90 px-4 py-2 text-sm font-medium text-destructive-foreground backdrop-blur-sm">
             <WifiOff className="h-4 w-4" />
             <span>{translate('network.offline')}</span>
             {queueCount > 0 && (
-              <span className="flex items-center gap-1 ml-2 bg-white/20 rounded-full px-2 py-0.5 text-xs">
+              <span className="ml-2 flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-xs">
                 <CloudOff className="h-3 w-3" />
                 {queueCount} {translate('queue.itemsQueued')}
               </span>
@@ -44,9 +44,9 @@ export function OnlineStatusIndicator({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
-          className="fixed top-0 left-0 right-0 z-50 safe-top"
+          className="safe-top fixed left-0 right-0 top-0 z-50"
         >
-          <div className="flex items-center justify-center gap-2 py-2 px-4 bg-primary/90 text-primary-foreground text-sm font-medium backdrop-blur-sm">
+          <div className="flex items-center justify-center gap-2 bg-primary/90 px-4 py-2 text-sm font-medium text-primary-foreground backdrop-blur-sm">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
@@ -54,7 +54,7 @@ export function OnlineStatusIndicator({
               <RefreshCw className="h-4 w-4" />
             </motion.div>
             <span>{translate('queue.processing')}</span>
-            <span className="bg-white/20 rounded-full px-2 py-0.5 text-xs">
+            <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs">
               {queueCount} {translate('queue.itemsQueued')}
             </span>
           </div>
@@ -72,9 +72,7 @@ export function OnlineStatusBadge({ isOnline }: { isOnline: boolean }) {
       animate={{ scale: 1 }}
       className={cn(
         'flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium',
-        isOnline 
-          ? 'bg-green-500/10 text-green-500' 
-          : 'bg-destructive/10 text-destructive'
+        isOnline ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'
       )}
     >
       {isOnline ? (

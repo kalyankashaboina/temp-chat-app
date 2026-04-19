@@ -14,11 +14,11 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [forgotPassword, { isLoading }] = useForgotPasswordMutation();
-  const language = useAppSelector(state => state.settings?.language || 'en');
+  const language = useAppSelector((state) => state.settings?.language || 'en');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Zod validation
     const parsed = forgotPasswordSchema.safeParse({ email });
     if (!parsed.success) {
@@ -43,12 +43,8 @@ export default function ForgotPasswordPage() {
             <CheckCircle className="h-8 w-8 text-status-online" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {t('auth.resetSent', language)}
-            </h1>
-            <p className="mt-2 text-muted-foreground">
-              {t('auth.resetSentDesc', language)}
-            </p>
+            <h1 className="text-2xl font-bold text-foreground">{t('auth.resetSent', language)}</h1>
+            <p className="mt-2 text-muted-foreground">{t('auth.resetSentDesc', language)}</p>
             <p className="mt-4 text-sm text-muted-foreground">
               Sent to: <span className="font-medium text-foreground">{email}</span>
             </p>
@@ -75,9 +71,7 @@ export default function ForgotPasswordPage() {
           <h1 className="mt-6 text-3xl font-bold tracking-tight text-foreground">
             {t('auth.forgotTitle', language)}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t('auth.forgotSubtitle', language)}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('auth.forgotSubtitle', language)}</p>
         </div>
 
         {/* Form */}
@@ -100,12 +94,7 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -121,7 +110,7 @@ export default function ForgotPasswordPage() {
         <div className="text-center">
           <Link
             to="/login"
-            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             {t('action.backToLogin', language)}

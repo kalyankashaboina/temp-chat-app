@@ -28,16 +28,20 @@ export const loginUser = createAsyncThunk(
     const result = await authService.login(email, password);
     if (!result.success || !result.user) return rejectWithValue(result.error || 'Login failed');
     return result.user;
-  },
+  }
 );
 
 export const registerUser = createAsyncThunk(
   'auth/register',
-  async ({ name, email, password }: { name: string; email: string; password: string }, { rejectWithValue }) => {
+  async (
+    { name, email, password }: { name: string; email: string; password: string },
+    { rejectWithValue }
+  ) => {
     const result = await authService.register(name, email, password);
-    if (!result.success || !result.user) return rejectWithValue(result.error || 'Registration failed');
+    if (!result.success || !result.user)
+      return rejectWithValue(result.error || 'Registration failed');
     return result.user;
-  },
+  }
 );
 
 export const forgotPasswordAction = createAsyncThunk(
@@ -46,7 +50,7 @@ export const forgotPasswordAction = createAsyncThunk(
     const result = await authService.forgotPassword(email);
     if (!result.success) return rejectWithValue(result.error || 'Failed to send reset email');
     return true;
-  },
+  }
 );
 
 export const logoutUserAsync = createAsyncThunk('auth/logoutAsync', async () => {
@@ -70,7 +74,9 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     // init
-    builder.addCase(initAuth.pending, (state) => { state.isLoading = true; });
+    builder.addCase(initAuth.pending, (state) => {
+      state.isLoading = true;
+    });
     builder.addCase(initAuth.fulfilled, (state, action) => {
       state.isLoading = false;
       state.isInitialized = true;
@@ -81,28 +87,52 @@ const authSlice = createSlice({
       state.isInitialized = true;
     });
     // login
-    builder.addCase(loginUser.pending,    (state) => { state.isLoading = true; });
-    builder.addCase(loginUser.fulfilled,  (state, action) => { state.isLoading = false; state.user = action.payload; state.isInitialized = true; });
-    builder.addCase(loginUser.rejected,   (state) => { state.isLoading = false; });
+    builder.addCase(loginUser.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(loginUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload;
+      state.isInitialized = true;
+    });
+    builder.addCase(loginUser.rejected, (state) => {
+      state.isLoading = false;
+    });
     // register
-    builder.addCase(registerUser.pending,   (state) => { state.isLoading = true; });
-    builder.addCase(registerUser.fulfilled, (state, action) => { state.isLoading = false; state.user = action.payload; state.isInitialized = true; });
-    builder.addCase(registerUser.rejected,  (state) => { state.isLoading = false; });
+    builder.addCase(registerUser.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(registerUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload;
+      state.isInitialized = true;
+    });
+    builder.addCase(registerUser.rejected, (state) => {
+      state.isLoading = false;
+    });
     // forgotPassword
-    builder.addCase(forgotPasswordAction.pending,   (state) => { state.isLoading = true; });
-    builder.addCase(forgotPasswordAction.fulfilled, (state) => { state.isLoading = false; });
-    builder.addCase(forgotPasswordAction.rejected,  (state) => { state.isLoading = false; });
+    builder.addCase(forgotPasswordAction.pending, (state) => {
+      state.isLoading = true;
+    });
+    builder.addCase(forgotPasswordAction.fulfilled, (state) => {
+      state.isLoading = false;
+    });
+    builder.addCase(forgotPasswordAction.rejected, (state) => {
+      state.isLoading = false;
+    });
     // logout
-    builder.addCase(logoutUserAsync.fulfilled, (state) => { state.user = null; });
+    builder.addCase(logoutUserAsync.fulfilled, (state) => {
+      state.user = null;
+    });
   },
 });
 
 export const { logoutUser, setLanguage, setUser } = authSlice.actions;
 export default authSlice.reducer;
 
-export const selectAuth    = (s: { auth: AuthState }) => s.auth;
-export const selectUser    = (s: { auth: AuthState }) => s.auth.user;
+export const selectAuth = (s: { auth: AuthState }) => s.auth;
+export const selectUser = (s: { auth: AuthState }) => s.auth.user;
 export const selectIsAuthenticated = (s: { auth: AuthState }) => !!s.auth.user;
-export const selectAuthLoading     = (s: { auth: AuthState }) => s.auth.isLoading;
-export const selectAuthLanguage    = (s: { auth: AuthState }) => s.auth.language;
-export const selectIsInitialized   = (s: { auth: AuthState }) => s.auth.isInitialized;
+export const selectAuthLoading = (s: { auth: AuthState }) => s.auth.isLoading;
+export const selectAuthLanguage = (s: { auth: AuthState }) => s.auth.language;
+export const selectIsInitialized = (s: { auth: AuthState }) => s.auth.isInitialized;

@@ -21,7 +21,21 @@ import { ContactDetails } from './ContactDetails';
 import { useSwipeGesture } from '@/shared/hooks/useSwipeGesture';
 import { useScrollPagination } from '@/shared/hooks/useScrollPagination';
 import { cn } from '@/lib/utils';
-import { MessageSquare, Phone, Video, LogOut, Users, ArrowLeft, Search, MoreVertical, Timer, Shield, Image, Star, User } from 'lucide-react';
+import {
+  MessageSquare,
+  Phone,
+  Video,
+  LogOut,
+  Users,
+  ArrowLeft,
+  Search,
+  MoreVertical,
+  Timer,
+  Shield,
+  Image,
+  Star,
+  User,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/features/auth/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -41,11 +55,11 @@ interface ChatWindowProps {
 import { getInitials, getAvatarColor } from '@/shared/lib/chatUtils';
 
 export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
-  const { 
-    messages, 
-    activeConversation, 
-    translate, 
-    isTyping, 
+  const {
+    messages,
+    activeConversation,
+    translate,
+    isTyping,
     typingUsers,
     toggleVanishMode,
     replyingTo,
@@ -79,19 +93,14 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
   const prevLastMessageIdRef = useRef<string | null>(null);
 
   // Scroll pagination hook
-  const {
-    isNearBottom,
-    scrollToBottom,
-    newMessagesCount,
-    setNewMessagesCount,
-    handleScroll,
-  } = useScrollPagination({
-    containerRef: messagesContainerRef,
-    hasMore: hasMoreMessages,
-    isLoading: isLoadingMore,
-    onLoadMore: loadMoreMessages,
-    threshold: 100,
-  });
+  const { isNearBottom, scrollToBottom, newMessagesCount, setNewMessagesCount, handleScroll } =
+    useScrollPagination({
+      containerRef: messagesContainerRef,
+      hasMore: hasMoreMessages,
+      isLoading: isLoadingMore,
+      onLoadMore: loadMoreMessages,
+      threshold: 100,
+    });
 
   // Swipe gesture for mobile back navigation
   const { handlers: swipeHandlers } = useSwipeGesture({
@@ -109,10 +118,14 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
 
   // Track new messages when user is scrolled up
   useEffect(() => {
-    if (lastMessageId && prevLastMessageIdRef.current && lastMessageId !== prevLastMessageIdRef.current) {
+    if (
+      lastMessageId &&
+      prevLastMessageIdRef.current &&
+      lastMessageId !== prevLastMessageIdRef.current
+    ) {
       // New message arrived
       if (!isNearBottom) {
-        setNewMessagesCount(prev => prev + 1);
+        setNewMessagesCount((prev) => prev + 1);
       }
     }
     prevLastMessageIdRef.current = lastMessageId;
@@ -173,15 +186,15 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
   if (!activeConversation) {
     return (
       <div className="flex h-full items-center justify-center bg-background">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="text-center text-muted-foreground px-4"
+          className="px-4 text-center text-muted-foreground"
         >
-          <div className="mx-auto mb-6 h-20 w-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/5">
             <MessageSquare className="h-10 w-10 text-primary/60" />
           </div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">No chat selected</h3>
+          <h3 className="mb-2 text-lg font-semibold text-foreground">No chat selected</h3>
           <p className="text-sm">{translate('conversations.empty')}</p>
         </motion.div>
       </div>
@@ -190,14 +203,21 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
 
   const isGroup = activeConversation.isGroup;
   const displayName = isGroup ? activeConversation.groupName : activeConversation.user?.name;
-  const isUserOnline = isGroup ? activeConversation.users?.some(u => u.isOnline) : activeConversation.user?.isOnline;
+  const isUserOnline = isGroup
+    ? activeConversation.users?.some((u) => u.isOnline)
+    : activeConversation.user?.isOnline;
   const memberCount = isGroup ? activeConversation.users?.length : undefined;
-  const typingNames = isGroup && typingUsers.length > 0 ? typingUsers : isTyping && activeConversation.user ? [activeConversation.user.name] : [];
+  const typingNames =
+    isGroup && typingUsers.length > 0
+      ? typingUsers
+      : isTyping && activeConversation.user
+        ? [activeConversation.user.name]
+        : [];
 
   return (
     <>
-      <motion.div 
-        className="flex h-full flex-col bg-background relative"
+      <motion.div
+        className="relative flex h-full flex-col bg-background"
         {...swipeHandlers}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -221,13 +241,13 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
         </AnimatePresence>
 
         {/* Chat header */}
-        <div className="flex items-center justify-between border-b border-border bg-card px-2 sm:px-4 py-3 flex-shrink-0 safe-top">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+        <div className="safe-top flex flex-shrink-0 items-center justify-between border-b border-border bg-card px-2 py-3 sm:px-4">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={handleBack}
-              className="md:hidden text-muted-foreground hover:text-foreground flex-shrink-0 touch-target"
+              className="touch-target flex-shrink-0 text-muted-foreground hover:text-foreground md:hidden"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -238,36 +258,44 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
                   <Users className="h-5 w-5" />
                 </div>
               ) : (
-                <div className={cn(
-                  'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
-                  getAvatarColor(displayName || '')
-                )}>
+                <div
+                  className={cn(
+                    'flex h-10 w-10 items-center justify-center rounded-full text-sm font-semibold text-white',
+                    getAvatarColor(displayName || '')
+                  )}
+                >
                   {getInitials(displayName || '')}
                 </div>
               )}
               {!isGroup && (
-                <motion.div 
+                <motion.div
                   animate={{ scale: isUserOnline ? [1, 1.2, 1] : 1 }}
                   transition={{ duration: 2, repeat: Infinity }}
                   className={cn(
                     'absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card',
                     isUserOnline ? 'bg-green-500' : 'bg-muted'
-                  )} 
+                  )}
                 />
               )}
             </div>
-            
+
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-foreground truncate">{displayName}</h3>
+                <h3 className="truncate font-semibold text-foreground">{displayName}</h3>
                 <EncryptionIndicator isEncrypted compact translate={translate} />
               </div>
-              <p className={cn(
-                'text-xs truncate',
-                typingNames.length > 0 ? 'text-primary' : isUserOnline ? 'text-green-500' : 'text-muted-foreground'
-              )}>
+              <p
+                className={cn(
+                  'truncate text-xs',
+                  typingNames.length > 0
+                    ? 'text-primary'
+                    : isUserOnline
+                      ? 'text-green-500'
+                      : 'text-muted-foreground'
+                )}
+              >
                 {typingNames.length > 0
-                  ? typingNames.length === 1 
+                  ? typingNames.length === 1
                     ? `${typingNames[0]} ${translate('typing.indicator')}`
                     : `${typingNames.join(', ')} ${translate('typing.multiple')}`
                   : isGroup
@@ -279,7 +307,7 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-1">
             {/* Online status badge */}
             <div className="hidden sm:block">
               <OnlineStatusBadge isOnline={isOnline} />
@@ -289,7 +317,7 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
               variant="ghost"
               size="icon"
               onClick={() => setShowSearch(true)}
-              className="text-muted-foreground hover:text-foreground hidden sm:flex"
+              className="hidden text-muted-foreground hover:text-foreground sm:flex"
               title={translate('action.search')}
             >
               <Search className="h-5 w-5" />
@@ -305,12 +333,12 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
             </div>
 
             {!isGroup && (
-              <div className="hidden md:flex items-center gap-1">
+              <div className="hidden items-center gap-1 md:flex">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={handleAudioCall}
-                  className="text-muted-foreground hover:text-foreground touch-target"
+                  className="touch-target text-muted-foreground hover:text-foreground"
                   title={translate('action.call')}
                 >
                   <Phone className="h-5 w-5" />
@@ -319,7 +347,7 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
                   variant="ghost"
                   size="icon"
                   onClick={handleVideoCall}
-                  className="text-muted-foreground hover:text-foreground touch-target"
+                  className="touch-target text-muted-foreground hover:text-foreground"
                   title={translate('action.videoCall')}
                 >
                   <Video className="h-5 w-5" />
@@ -333,48 +361,64 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground touch-target">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="touch-target text-muted-foreground hover:text-foreground"
+                >
                   <MoreVertical className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 z-50 bg-popover">
+              <DropdownMenuContent align="end" className="z-50 w-48 bg-popover">
                 <DropdownMenuItem onClick={() => setShowSearch(true)} className="sm:hidden">
-                  <Search className="h-4 w-4 mr-2" />{translate('action.search')}
+                  <Search className="mr-2 h-4 w-4" />
+                  {translate('action.search')}
                 </DropdownMenuItem>
                 {!isGroup && (
                   <DropdownMenuItem onClick={() => setShowContactDetails(true)}>
-                    <User className="h-4 w-4 mr-2" />View Contact
+                    <User className="mr-2 h-4 w-4" />
+                    View Contact
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem onClick={() => setShowStarred(true)}>
-                  <Star className="h-4 w-4 mr-2" />{translate('starred.title')}
+                  <Star className="mr-2 h-4 w-4" />
+                  {translate('starred.title')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowEncryption(!showEncryption)}>
-                  <Shield className="h-4 w-4 mr-2" />{translate('encryption.info')}
+                  <Shield className="mr-2 h-4 w-4" />
+                  {translate('encryption.info')}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleVanishToggle(!activeConversation.isVanishMode, 60)}>
-                  <Timer className="h-4 w-4 mr-2" />
-                  {activeConversation.isVanishMode ? translate('vanish.turnOff') : translate('vanish.off')}
+                <DropdownMenuItem
+                  onClick={() => handleVanishToggle(!activeConversation.isVanishMode, 60)}
+                >
+                  <Timer className="mr-2 h-4 w-4" />
+                  {activeConversation.isVanishMode
+                    ? translate('vanish.turnOff')
+                    : translate('vanish.off')}
                 </DropdownMenuItem>
                 {onOpenMediaGallery && (
                   <DropdownMenuItem onClick={onOpenMediaGallery}>
-                    <Image className="h-4 w-4 mr-2" />{translate('media.gallery')}
+                    <Image className="mr-2 h-4 w-4" />
+                    {translate('media.gallery')}
                   </DropdownMenuItem>
                 )}
                 {!isGroup && (
                   <>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleAudioCall} className="md:hidden">
-                      <Phone className="h-4 w-4 mr-2" />{translate('action.call')}
+                      <Phone className="mr-2 h-4 w-4" />
+                      {translate('action.call')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={handleVideoCall} className="md:hidden">
-                      <Video className="h-4 w-4 mr-2" />{translate('action.videoCall')}
+                      <Video className="mr-2 h-4 w-4" />
+                      {translate('action.videoCall')}
                     </DropdownMenuItem>
                   </>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                  <LogOut className="h-4 w-4 mr-2" />{translate('action.logout')}
+                  <LogOut className="mr-2 h-4 w-4" />
+                  {translate('action.logout')}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -387,7 +431,7 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
               variant="ghost"
               size="icon"
               onClick={handleLogout}
-              className="text-muted-foreground hover:text-destructive hidden md:flex touch-target"
+              className="touch-target hidden text-muted-foreground hover:text-destructive md:flex"
               title={translate('action.logout')}
             >
               <LogOut className="h-5 w-5" />
@@ -397,9 +441,7 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
 
         {/* Encryption banner */}
         <AnimatePresence>
-          {showEncryption && (
-            <EncryptionBanner translate={translate} />
-          )}
+          {showEncryption && <EncryptionBanner translate={translate} />}
         </AnimatePresence>
 
         {/* Pinned messages bar */}
@@ -430,16 +472,14 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
         />
 
         {/* Messages area */}
-        <div 
+        <div
           ref={messagesContainerRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 sm:space-y-4 bg-gradient-to-b from-background to-muted/20 relative"
+          className="relative flex-1 space-y-3 overflow-y-auto bg-gradient-to-b from-background to-muted/20 p-3 sm:space-y-4 sm:p-4"
         >
           {/* Loading indicator at top */}
           <AnimatePresence>
-            {isLoadingMore && (
-              <MessageLoadingIndicator translate={translate} />
-            )}
+            {isLoadingMore && <MessageLoadingIndicator translate={translate} />}
           </AnimatePresence>
 
           {/* No more messages indicator */}
@@ -447,22 +487,22 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-2"
+              className="py-2 text-center"
             >
-              <span className="text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+              <span className="rounded-full bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
                 {translate('messages.noMoreHistory')}
               </span>
             </motion.div>
           )}
 
           {messages.length === 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex h-full items-center justify-center"
             >
-              <div className="text-center text-muted-foreground px-4">
-                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center">
+              <div className="px-4 text-center text-muted-foreground">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted/50">
                   <MessageSquare className="h-8 w-8 opacity-50" />
                 </div>
                 <p className="text-sm">Start a conversation with {displayName}</p>
@@ -471,15 +511,16 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
           ) : (
             <>
               {messages.map((message, index) => (
-                <motion.div 
-                  key={message.id} 
+                <motion.div
+                  key={message.id}
                   id={`message-${message.id}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(index * 0.02, 0.3), duration: 0.3 }}
                   className={cn(
                     'transition-all duration-500',
-                    highlightedMessageId === message.id && 'bg-primary/20 rounded-xl -mx-2 px-2 py-1'
+                    highlightedMessageId === message.id &&
+                      '-mx-2 rounded-xl bg-primary/20 px-2 py-1'
                   )}
                 >
                   <MessageBubble message={message} />
@@ -517,18 +558,18 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
         {/* Reply preview */}
         <AnimatePresence>
           {replyingTo && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="px-3 sm:px-4 pt-2 flex-shrink-0"
+              className="flex-shrink-0 px-3 pt-2 sm:px-4"
             >
               <ReplyPreview replyTo={replyingTo} onCancel={() => setReplyingTo(null)} />
             </motion.div>
           )}
         </AnimatePresence>
 
-        <div className="flex-shrink-0 safe-bottom">
+        <div className="safe-bottom flex-shrink-0">
           <MessageInput />
         </div>
       </motion.div>
@@ -561,7 +602,9 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
           isMuted={activeConversation.isMuted || false}
           isArchived={activeConversation.isArchived || false}
           onMuteToggle={() => muteConversation(activeConversation.id, !activeConversation.isMuted)}
-          onArchiveToggle={() => archiveConversation(activeConversation.id, !activeConversation.isArchived)}
+          onArchiveToggle={() =>
+            archiveConversation(activeConversation.id, !activeConversation.isArchived)
+          }
           onCall={(type) => initiateCall(type, activeConversation.user!)}
           translate={translate}
         />

@@ -26,7 +26,7 @@ export function NetworkStatusBar() {
             <span>{translate('status.offline')}</span>
           </>
         )}
-        
+
         {queue.length > 0 && (
           <span className="ml-2 flex items-center gap-1 text-muted-foreground">
             <RefreshCw className="h-3 w-3 animate-spin" />

@@ -9,33 +9,33 @@ interface AttachmentMenuProps {
 }
 
 const MENU_ITEMS = [
-  { 
-    type: 'image' as const, 
-    icon: Image, 
+  {
+    type: 'image' as const,
+    icon: Image,
     labelKey: 'upload.image',
     accept: 'image/*',
     color: 'text-green-500',
     bgColor: 'bg-green-500/10',
   },
-  { 
-    type: 'video' as const, 
-    icon: Video, 
+  {
+    type: 'video' as const,
+    icon: Video,
     labelKey: 'upload.video',
     accept: 'video/*',
     color: 'text-blue-500',
     bgColor: 'bg-blue-500/10',
   },
-  { 
-    type: 'audio' as const, 
-    icon: Music, 
+  {
+    type: 'audio' as const,
+    icon: Music,
     labelKey: 'upload.audio',
     accept: 'audio/*',
     color: 'text-purple-500',
     bgColor: 'bg-purple-500/10',
   },
-  { 
-    type: 'file' as const, 
-    icon: FileText, 
+  {
+    type: 'file' as const,
+    icon: FileText,
     labelKey: 'upload.file',
     accept: '.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx',
     color: 'text-orange-500',
@@ -59,14 +59,17 @@ export function AttachmentMenu({ onFileSelect, translate, className }: Attachmen
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleItemClick = (type: typeof MENU_ITEMS[number]['type']) => {
+  const handleItemClick = (type: (typeof MENU_ITEMS)[number]['type']) => {
     const input = fileInputRefs.current[type];
     if (input) {
       input.click();
     }
   };
 
-  const handleFileChange = (type: typeof MENU_ITEMS[number]['type'], e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    type: (typeof MENU_ITEMS)[number]['type'],
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (e.target.files && e.target.files.length > 0) {
       onFileSelect(e.target.files, type);
       setIsOpen(false);
@@ -97,7 +100,7 @@ export function AttachmentMenu({ onFileSelect, translate, className }: Attachmen
         className={cn(
           'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
           isOpen
-            ? 'bg-primary text-primary-foreground rotate-45'
+            ? 'rotate-45 bg-primary text-primary-foreground'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         )}
       >
@@ -106,7 +109,7 @@ export function AttachmentMenu({ onFileSelect, translate, className }: Attachmen
 
       {/* Menu */}
       {isOpen && (
-        <div className="absolute bottom-12 left-0 z-50 flex flex-col gap-2 rounded-xl border border-border bg-card p-2 shadow-xl animate-fade-in">
+        <div className="animate-fade-in absolute bottom-12 left-0 z-50 flex flex-col gap-2 rounded-xl border border-border bg-card p-2 shadow-xl">
           {MENU_ITEMS.map((item) => {
             const Icon = item.icon;
             return (
@@ -119,7 +122,12 @@ export function AttachmentMenu({ onFileSelect, translate, className }: Attachmen
                   'min-w-[140px]'
                 )}
               >
-                <div className={cn('flex h-8 w-8 items-center justify-center rounded-lg', item.bgColor)}>
+                <div
+                  className={cn(
+                    'flex h-8 w-8 items-center justify-center rounded-lg',
+                    item.bgColor
+                  )}
+                >
                   <Icon className={cn('h-4 w-4', item.color)} />
                 </div>
                 <span className="text-sm font-medium text-foreground">

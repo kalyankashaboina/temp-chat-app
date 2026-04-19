@@ -24,7 +24,7 @@ export function ThemeToggle() {
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
-    
+
     if (newTheme === 'system') {
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       root.classList.toggle('light', !systemDark);
@@ -45,7 +45,7 @@ export function ThemeToggle() {
     { value: 'system' as const, label: 'System', icon: Monitor },
   ];
 
-  const CurrentIcon = themes.find(t => t.value === theme)?.icon || Moon;
+  const CurrentIcon = themes.find((t) => t.value === theme)?.icon || Moon;
 
   return (
     <DropdownMenu>
@@ -59,7 +59,7 @@ export function ThemeToggle() {
           <DropdownMenuItem
             key={value}
             onClick={() => handleThemeChange(value)}
-            className={cn('gap-2 cursor-pointer', theme === value && 'bg-primary/10 text-primary')}
+            className={cn('cursor-pointer gap-2', theme === value && 'bg-primary/10 text-primary')}
           >
             <Icon className="h-4 w-4" />
             {label}

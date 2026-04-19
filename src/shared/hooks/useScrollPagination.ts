@@ -27,7 +27,7 @@ export function useScrollPagination({
   const [newMessagesCount, setNewMessagesCount] = useState(0);
   const previousScrollHeightRef = useRef<number>(0);
   const isLoadingRef = useRef(isLoading);
-  
+
   // Keep loading ref in sync
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -52,11 +52,11 @@ export function useScrollPagination({
     if (!container) return;
 
     const { scrollTop, scrollHeight, clientHeight } = container;
-    
+
     // Check if near bottom (within 150px)
     const nearBottom = scrollHeight - scrollTop - clientHeight < 150;
     setIsNearBottom(nearBottom);
-    
+
     // Clear new message count when scrolling to bottom
     if (nearBottom) {
       setNewMessagesCount(0);
@@ -70,16 +70,19 @@ export function useScrollPagination({
     }
   }, [containerRef, hasMore, onLoadMore, threshold]);
 
-  const scrollToBottom = useCallback((smooth = true) => {
-    const container = containerRef.current;
-    if (!container) return;
-    
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: smooth ? 'smooth' : 'auto',
-    });
-    setNewMessagesCount(0);
-  }, [containerRef]);
+  const scrollToBottom = useCallback(
+    (smooth = true) => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: smooth ? 'smooth' : 'auto',
+      });
+      setNewMessagesCount(0);
+    },
+    [containerRef]
+  );
 
   return {
     isNearBottom,

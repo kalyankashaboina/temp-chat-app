@@ -22,13 +22,13 @@ export function InstallPrompt() {
     const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
+
       // Show prompt after delay
       setTimeout(() => setShowPrompt(true), 3000);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-    
+
     // For iOS, show instructions after delay
     if (platform === 'ios' && !isStandalone) {
       setTimeout(() => setShowPrompt(true), 5000);
@@ -50,7 +50,7 @@ export function InstallPrompt() {
 
     await deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
       setDeferredPrompt(null);
     }
@@ -76,7 +76,8 @@ export function InstallPrompt() {
     }
   }, []);
 
-  const DeviceIcon = deviceType === 'mobile' ? Smartphone : deviceType === 'tablet' ? Tablet : Monitor;
+  const DeviceIcon =
+    deviceType === 'mobile' ? Smartphone : deviceType === 'tablet' ? Tablet : Monitor;
 
   if (isStandalone || !showPrompt) return null;
 
@@ -94,42 +95,33 @@ export function InstallPrompt() {
             <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
               {/* Gradient accent */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-accent to-primary" />
-              
+
               <div className="p-4">
                 <button
                   onClick={dismiss}
-                  className="absolute top-3 right-3 p-1 rounded-full hover:bg-muted transition-colors"
+                  className="absolute right-3 top-3 rounded-full p-1 transition-colors hover:bg-muted"
                 >
                   <X className="h-4 w-4 text-muted-foreground" />
                 </button>
 
                 <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <DeviceIcon className="h-6 w-6 text-primary" />
                   </div>
-                  
-                  <div className="flex-1 min-w-0">
+
+                  <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-foreground">Install ChatApp</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       Add to your home screen for the best experience. Works offline!
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={dismiss}
-                    className="flex-1"
-                  >
+                <div className="mt-4 flex gap-2">
+                  <Button variant="ghost" size="sm" onClick={dismiss} className="flex-1">
                     Not now
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleInstall}
-                    className="flex-1 gap-2"
-                  >
+                  <Button size="sm" onClick={handleInstall} className="flex-1 gap-2">
                     <Download className="h-4 w-4" />
                     Install
                   </Button>
@@ -147,7 +139,7 @@ export function InstallPrompt() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm p-4"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 backdrop-blur-sm"
             onClick={dismiss}
           >
             <motion.div
@@ -155,19 +147,19 @@ export function InstallPrompt() {
               animate={{ y: 0 }}
               exit={{ y: 100 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl bg-card border border-border overflow-hidden"
+              className="w-full max-w-md overflow-hidden rounded-2xl border border-border bg-card"
             >
               <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Install on iOS</h3>
-                  <button onClick={dismiss} className="p-1 hover:bg-muted rounded-full">
+                  <button onClick={dismiss} className="rounded-full p-1 hover:bg-muted">
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <span className="text-lg font-bold text-primary">1</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -178,12 +170,12 @@ export function InstallPrompt() {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <span className="text-lg font-bold text-primary">2</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span>Scroll down and tap</span>
-                      <div className="flex items-center gap-1 px-2 py-1 bg-muted rounded">
+                      <div className="flex items-center gap-1 rounded bg-muted px-2 py-1">
                         <Plus className="h-4 w-4" />
                         <span className="text-sm">Add to Home Screen</span>
                       </div>
@@ -191,14 +183,14 @@ export function InstallPrompt() {
                   </div>
 
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                       <span className="text-lg font-bold text-primary">3</span>
                     </div>
                     <span>Tap "Add" to install</span>
                   </div>
                 </div>
 
-                <Button onClick={dismiss} className="w-full mt-6">
+                <Button onClick={dismiss} className="mt-6 w-full">
                   Got it!
                 </Button>
               </div>

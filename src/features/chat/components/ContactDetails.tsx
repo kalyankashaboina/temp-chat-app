@@ -1,34 +1,29 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Message, FileAttachment } from '@/features/chat/types';
-import { 
-  X, 
-  Phone, 
-  Video, 
-  Mail, 
-  Star, 
-  Bell, 
-  BellOff, 
-  Archive, 
-  Trash2, 
-  Image, 
-  File, 
-  Music, 
+import {
+  X,
+  Phone,
+  Video,
+  Mail,
+  Star,
+  Bell,
+  BellOff,
+  Archive,
+  Trash2,
+  Image,
+  File,
+  Music,
   FileText,
   MoreVertical,
   ExternalLink,
   Shield,
-  Clock
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -46,7 +41,12 @@ interface ContactDetailsProps {
 }
 
 function getInitials(name: string): string {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function getAvatarColor(name: string): string {
@@ -71,24 +71,24 @@ export function ContactDetails({
   if (!user) return null;
 
   // Extract media from messages
-  const allAttachments = messages.flatMap(m => m.attachments);
-  const images = allAttachments.filter(a => a.type === 'image');
-  const files = allAttachments.filter(a => a.type === 'document' || a.type === 'text');
-  const audio = allAttachments.filter(a => a.type === 'audio');
+  const allAttachments = messages.flatMap((m) => m.attachments);
+  const images = allAttachments.filter((a) => a.type === 'image');
+  const files = allAttachments.filter((a) => a.type === 'document' || a.type === 'text');
+  const audio = allAttachments.filter((a) => a.type === 'audio');
 
   // Get starred messages count
-  const starredCount = messages.filter(m => m.isPinned).length;
+  const starredCount = messages.filter((m) => m.isPinned).length;
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 overflow-hidden">
+      <SheetContent side="right" className="w-full overflow-hidden p-0 sm:max-w-md">
         {/* Header with gradient background */}
         <div className="relative h-32 bg-gradient-to-br from-primary/80 to-primary/40">
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="absolute top-4 right-4 text-white hover:bg-white/20"
+            className="absolute right-4 top-4 text-white hover:bg-white/20"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -98,55 +98,63 @@ export function ContactDetails({
         <div className="relative px-4 pb-4">
           {/* Avatar - positioned to overlap header */}
           <div className="relative -mt-16 mb-4">
-            <div className={cn(
-              'h-24 w-24 rounded-full flex items-center justify-center text-2xl font-bold text-white border-4 border-background shadow-xl mx-auto',
-              getAvatarColor(user.name)
-            )}>
+            <div
+              className={cn(
+                'mx-auto flex h-24 w-24 items-center justify-center rounded-full border-4 border-background text-2xl font-bold text-white shadow-xl',
+                getAvatarColor(user.name)
+              )}
+            >
               {getInitials(user.name)}
             </div>
             {/* Online indicator */}
-            <div className={cn(
-              'absolute bottom-1 right-1/3 h-5 w-5 rounded-full border-4 border-background',
-              user.isOnline ? 'bg-green-500' : 'bg-muted'
-            )} />
+            <div
+              className={cn(
+                'absolute bottom-1 right-1/3 h-5 w-5 rounded-full border-4 border-background',
+                user.isOnline ? 'bg-green-500' : 'bg-muted'
+              )}
+            />
           </div>
 
           {/* User info */}
-          <div className="text-center mb-4">
+          <div className="mb-4 text-center">
             <h2 className="text-xl font-bold text-foreground">{user.name}</h2>
-            <p className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+            <p className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
               <Mail className="h-3.5 w-3.5" />
               {user.email}
             </p>
-            <p className={cn(
-              'text-xs mt-1',
-              user.isOnline ? 'text-green-500' : 'text-muted-foreground'
-            )}>
-              {user.isOnline ? translate('status.online') : `Last seen ${user.lastSeen ? format(user.lastSeen, 'MMM d, HH:mm') : 'recently'}`}
+            <p
+              className={cn(
+                'mt-1 text-xs',
+                user.isOnline ? 'text-green-500' : 'text-muted-foreground'
+              )}
+            >
+              {user.isOnline
+                ? translate('status.online')
+                : `Last seen ${user.lastSeen ? format(user.lastSeen, 'MMM d, HH:mm') : 'recently'}`}
             </p>
           </div>
 
           {/* Quick actions */}
-          <div className="flex justify-center gap-4 mb-6">
+          <div className="mb-6 flex justify-center gap-4">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCall('audio')}
               className="flex flex-col items-center gap-1"
             >
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20">
                 <Phone className="h-5 w-5" />
               </div>
               <span className="text-xs text-muted-foreground">{translate('action.call')}</span>
             </motion.button>
-            
+
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => onCall('video')}
               className="flex flex-col items-center gap-1"
             >
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary hover:bg-primary/20 transition-colors">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors hover:bg-primary/20">
                 <Video className="h-5 w-5" />
               </div>
               <span className="text-xs text-muted-foreground">{translate('action.videoCall')}</span>
@@ -154,12 +162,18 @@ export function ContactDetails({
           </div>
 
           {/* Settings section */}
-          <div className="space-y-1 mb-6">
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
+          <div className="mb-6 space-y-1">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3 transition-colors hover:bg-muted/70">
               <div className="flex items-center gap-3">
-                {isMuted ? <BellOff className="h-5 w-5 text-muted-foreground" /> : <Bell className="h-5 w-5 text-muted-foreground" />}
+                {isMuted ? (
+                  <BellOff className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <Bell className="h-5 w-5 text-muted-foreground" />
+                )}
                 <div>
-                  <p className="text-sm font-medium text-foreground">{translate('contact.muteNotifications')}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {translate('contact.muteNotifications')}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {isMuted ? translate('contact.muted') : translate('contact.notMuted')}
                   </p>
@@ -168,11 +182,13 @@ export function ContactDetails({
               <Switch checked={isMuted} onCheckedChange={onMuteToggle} />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3 transition-colors hover:bg-muted/70">
               <div className="flex items-center gap-3">
                 <Archive className="h-5 w-5 text-muted-foreground" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{translate('contact.archiveChat')}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {translate('contact.archiveChat')}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {isArchived ? translate('contact.archived') : translate('contact.notArchived')}
                   </p>
@@ -181,22 +197,28 @@ export function ContactDetails({
               <Switch checked={isArchived} onCheckedChange={onArchiveToggle} />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3 transition-colors hover:bg-muted/70">
               <div className="flex items-center gap-3">
                 <Star className="h-5 w-5 text-amber-500" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{translate('starred.title')}</p>
-                  <p className="text-xs text-muted-foreground">{starredCount} {translate('starred.messages')}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {translate('starred.title')}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {starredCount} {translate('starred.messages')}
+                  </p>
                 </div>
               </div>
               <ExternalLink className="h-4 w-4 text-muted-foreground" />
             </div>
 
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
+            <div className="flex items-center justify-between rounded-xl bg-muted/50 p-3 transition-colors hover:bg-muted/70">
               <div className="flex items-center gap-3">
                 <Shield className="h-5 w-5 text-green-500" />
                 <div>
-                  <p className="text-sm font-medium text-foreground">{translate('encryption.title')}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {translate('encryption.title')}
+                  </p>
                   <p className="text-xs text-muted-foreground">{translate('encryption.active')}</p>
                 </div>
               </div>
@@ -205,7 +227,7 @@ export function ContactDetails({
 
           {/* Media tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="w-full grid grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="media" className="gap-1.5">
                 <Image className="h-4 w-4" />
                 <span className="hidden sm:inline">{translate('media.photos')}</span>
@@ -234,12 +256,12 @@ export function ContactDetails({
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: idx * 0.05 }}
-                      className="aspect-square rounded-lg overflow-hidden bg-muted"
+                      className="aspect-square overflow-hidden rounded-lg bg-muted"
                     >
                       <img
                         src={img.url}
                         alt={img.name}
-                        className="w-full h-full object-cover hover:scale-110 transition-transform cursor-pointer"
+                        className="h-full w-full cursor-pointer object-cover transition-transform hover:scale-110"
                       />
                     </motion.div>
                   ))}
@@ -280,7 +302,7 @@ export function ContactDetails({
 function EmptyMediaState({ icon: Icon, text }: { icon: typeof Image; text: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-8 text-center">
-      <div className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
+      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
         <Icon className="h-6 w-6 text-muted-foreground/50" />
       </div>
       <p className="text-sm text-muted-foreground">{text}</p>
@@ -296,12 +318,12 @@ function FileItem({ file }: { file: FileAttachment }) {
   };
 
   return (
-    <div className="flex items-center gap-3 p-2 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors">
-      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-2 transition-colors hover:bg-muted/70">
+      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
         <File className="h-5 w-5 text-primary" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-foreground truncate">{file.name}</p>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
         <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
       </div>
     </div>

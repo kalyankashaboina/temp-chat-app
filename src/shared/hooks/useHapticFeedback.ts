@@ -15,25 +15,32 @@ const hapticPatterns: Record<HapticType, number[]> = {
 export function useHapticFeedback() {
   const { supportsVibration, platform } = useDeviceInfo();
 
-  const trigger = useCallback((type: HapticType = 'light') => {
-    if (!supportsVibration) return;
+  const trigger = useCallback(
+    (type: HapticType = 'light') => {
+      if (!supportsVibration) return;
 
-    // iOS uses different API through webkit
-    if (platform === 'ios') {
-      // Try to use iOS-specific haptic if available
-      try {
-        const webkit = (window as Window & { webkit?: { messageHandlers?: { haptic?: { postMessage: (msg: string) => void } } } }).webkit;
-        if (webkit?.messageHandlers?.haptic) {
-          webkit.messageHandlers.haptic.postMessage(type);
-          return;
+      // iOS uses different API through webkit
+      if (platform === 'ios') {
+        // Try to use iOS-specific haptic if available
+        try {
+          const webkit = (
+            window as Window & {
+              webkit?: { messageHandlers?: { haptic?: { postMessage: (msg: string) => void } } };
+            }
+          ).webkit;
+          if (webkit?.messageHandlers?.haptic) {
+            webkit.messageHandlers.haptic.postMessage(type);
+            return;
+          }
+        } catch {
+          // Fall back to vibration API
         }
-      } catch {
-        // Fall back to vibration API
       }
-    }
 
-    navigator.vibrate(hapticPatterns[type]);
-  }, [supportsVibration, platform]);
+      navigator.vibrate(hapticPatterns[type]);
+    },
+    [supportsVibration, platform]
+  );
 
   const lightImpact = useCallback(() => trigger('light'), [trigger]);
   const mediumImpact = useCallback(() => trigger('medium'), [trigger]);

@@ -39,9 +39,8 @@ const loadPreferences = (): NotificationPreferences => {
 };
 
 const initialState: NotificationState = {
-  permission: typeof window !== 'undefined' && 'Notification' in window 
-    ? Notification.permission 
-    : 'default',
+  permission:
+    typeof window !== 'undefined' && 'Notification' in window ? Notification.permission : 'default',
   isSupported: typeof window !== 'undefined' && 'Notification' in window,
   preferences: loadPreferences(),
   isLoading: false,
@@ -74,10 +73,10 @@ export const updateNotificationPreferences = createAsyncThunk(
         ...state.notification.preferences,
         ...preferences,
       };
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
+      await new Promise((resolve) => setTimeout(resolve, 200));
+
       localStorage.setItem('notification_preferences', JSON.stringify(newPreferences));
       return newPreferences;
     } catch (error) {
@@ -90,7 +89,13 @@ export const updateNotificationPreferences = createAsyncThunk(
 export const sendPushNotification = createAsyncThunk(
   'notification/sendPush',
   async (
-    { title, body, icon, tag, data }: {
+    {
+      title,
+      body,
+      icon,
+      tag,
+      data,
+    }: {
       title: string;
       body: string;
       icon?: string;
@@ -101,11 +106,11 @@ export const sendPushNotification = createAsyncThunk(
   ) => {
     try {
       const state = getState() as { notification: NotificationState };
-      
+
       if (state.notification.permission !== 'granted') {
         return { success: false, reason: 'Permission not granted' };
       }
-      
+
       if (!state.notification.preferences.pushEnabled) {
         return { success: false, reason: 'Push notifications disabled' };
       }

@@ -2,12 +2,7 @@ import { MessageStatus } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
 import { Check, CheckCheck, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface MessageStatusIndicatorProps {
   status: MessageStatus;
@@ -15,13 +10,16 @@ interface MessageStatusIndicatorProps {
 }
 
 export function MessageStatusIndicator({ status, translate }: MessageStatusIndicatorProps) {
-  const config: Record<MessageStatus, { 
-    icon: typeof Check; 
-    color: string; 
-    animate: boolean; 
-    tooltip: string;
-    showPulse?: boolean;
-  }> = {
+  const config: Record<
+    MessageStatus,
+    {
+      icon: typeof Check;
+      color: string;
+      animate: boolean;
+      tooltip: string;
+      showPulse?: boolean;
+    }
+  > = {
     pending: {
       icon: Loader2,
       color: 'text-muted-foreground',
@@ -62,7 +60,7 @@ export function MessageStatusIndicator({ status, translate }: MessageStatusIndic
       <Tooltip>
         <TooltipTrigger asChild>
           <AnimatePresence mode="wait">
-            <motion.div 
+            <motion.div
               key={status}
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -70,11 +68,13 @@ export function MessageStatusIndicator({ status, translate }: MessageStatusIndic
               transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               className={cn('relative flex items-center', color)}
             >
-              <Icon className={cn(
-                'h-3.5 w-3.5 transition-colors duration-200', 
-                animate && 'animate-spin'
-              )} />
-              
+              <Icon
+                className={cn(
+                  'h-3.5 w-3.5 transition-colors duration-200',
+                  animate && 'animate-spin'
+                )}
+              />
+
               {/* Pulse effect for read status */}
               {status === 'read' && (
                 <motion.span
@@ -84,19 +84,19 @@ export function MessageStatusIndicator({ status, translate }: MessageStatusIndic
                   transition={{ duration: 0.6 }}
                 />
               )}
-              
+
               {/* Error pulse for failed */}
               {showPulse && (
                 <motion.span
                   className="absolute inset-0 rounded-full bg-destructive"
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.5, 1],
-                    opacity: [0.5, 0, 0.5]
+                    opacity: [0.5, 0, 0.5],
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 1.5,
                     repeat: Infinity,
-                    ease: "easeInOut"
+                    ease: 'easeInOut',
                   }}
                 />
               )}

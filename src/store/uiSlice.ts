@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
-type BottomSheetType = 'theme' | 'language' | 'notificationTone' | 'fontSize' | 'notificationSettings' | null;
+type BottomSheetType =
+  | 'theme'
+  | 'language'
+  | 'notificationTone'
+  | 'fontSize'
+  | 'notificationSettings'
+  | null;
 
 interface UIState {
   activeBottomSheet: BottomSheetType;

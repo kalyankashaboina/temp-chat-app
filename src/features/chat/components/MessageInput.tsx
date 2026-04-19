@@ -3,7 +3,21 @@ import { useChat } from '@/features/chat/useChat';
 import { validateFile } from '@/features/chat/services/messageService';
 import { useDraft } from '@/shared/hooks/useDraft';
 import { cn } from '@/lib/utils';
-import { Send, X, Image, Video, Music, FileText, File, Timer, Eye, Mic, Clock, FileEdit, AtSign } from 'lucide-react';
+import {
+  Send,
+  X,
+  Image,
+  Video,
+  Music,
+  FileText,
+  File,
+  Timer,
+  Eye,
+  Mic,
+  Clock,
+  FileEdit,
+  AtSign,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { EmojiPicker } from './EmojiPicker';
 import { AttachmentMenu } from './AttachmentMenu';
@@ -43,10 +57,10 @@ interface MessageInputProps {
 
 export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: MessageInputProps) {
   const { sendMessage, translate, isOnline, setTyping, activeConversation, allUsers } = useChat();
-  
+
   // Draft support
   const { draft, saveDraft, clearDraft, hasDraft } = useDraft(activeConversation?.id || null);
-  
+
   const [message, setMessage] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<SelectedFile[]>([]);
   const [isFocused, setIsFocused] = useState(false);
@@ -74,30 +88,30 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
   // Cleanup scheduled message timers on unmount
   useEffect(() => {
     return () => {
-      scheduledTimers.current.forEach(timer => clearTimeout(timer));
+      scheduledTimers.current.forEach((timer) => clearTimeout(timer));
     };
   }, []);
 
   const handleFileSelect = (files: FileList, _type: 'image' | 'video' | 'audio' | 'file') => {
     const fileArray = Array.from(files);
     const validFiles: SelectedFile[] = [];
-    
+
     for (const file of fileArray) {
       const validation = validateFile(file);
       if (!validation.valid) {
         toast.error(translate(validation.error || 'error.generic'));
         continue;
       }
-      
+
       const selectedFile: SelectedFile = { file };
-      
+
       if (file.type.startsWith('image/')) {
         selectedFile.preview = URL.createObjectURL(file);
       }
-      
+
       validFiles.push(selectedFile);
     }
-    
+
     setSelectedFiles((prev) => [...prev, ...validFiles]);
   };
 
@@ -132,7 +146,9 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
   };
 
   const handleVoiceSend = async (audioBlob: Blob) => {
-    const audioFile = new window.File([audioBlob], `voice-${Date.now()}.webm`, { type: 'audio/webm' });
+    const audioFile = new window.File([audioBlob], `voice-${Date.now()}.webm`, {
+      type: 'audio/webm',
+    });
     await sendMessage('', [audioFile]);
     setIsRecording(false);
     toast.success('Voice message sent');
@@ -140,7 +156,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!message.trim() && selectedFiles.length === 0) return;
 
     if (editingMessage && onSaveEdit) {
@@ -148,26 +164,26 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
       setMessage('');
       return;
     }
-    
+
     // Store values BEFORE clearing for optimistic UI
     const messageContent = message.trim();
     const files = selectedFiles.map((sf) => sf.file);
     const isVanish = activeConversation?.isVanishMode;
     const shouldShowViewOnce = isViewOnce && selectedFiles.length > 0;
     const wasOffline = !isOnline;
-    
+
     // Clear input IMMEDIATELY for optimistic UI (before async operation)
     setMessage('');
     setSelectedFiles([]);
     setTyping(false);
     setIsViewOnce(false);
     clearDraft();
-    
+
     // Show offline toast immediately if offline
     if (wasOffline) {
       toast.info(translate('error.offline'));
     }
-    
+
     // Send message asynchronously (doesn't block UI)
     sendMessage(messageContent, files, { isVanish, viewOnce: shouldShowViewOnce });
   };
@@ -180,17 +196,17 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
       id: scheduleId,
       content: message,
       scheduledAt,
-      attachments: selectedFiles.map(sf => sf.file),
+      attachments: selectedFiles.map((sf) => sf.file),
     };
 
-    setScheduledMessages(prev => [...prev, newScheduledMessage]);
+    setScheduledMessages((prev) => [...prev, newScheduledMessage]);
 
     const timeUntilSend = scheduledAt.getTime() - Date.now();
     const timer = setTimeout(async () => {
       const files = newScheduledMessage.attachments;
       const isVanish = activeConversation?.isVanishMode;
       await sendMessage(newScheduledMessage.content, files, { isVanish, viewOnce: false });
-      setScheduledMessages(prev => prev.filter(m => m.id !== scheduleId));
+      setScheduledMessages((prev) => prev.filter((m) => m.id !== scheduleId));
       scheduledTimers.current.delete(scheduleId);
       toast.success('Scheduled message sent!');
     }, timeUntilSend);
@@ -212,7 +228,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
       clearTimeout(timer);
       scheduledTimers.current.delete(id);
     }
-    setScheduledMessages(prev => prev.filter(m => m.id !== id));
+    setScheduledMessages((prev) => prev.filter((m) => m.id !== id));
     toast.info('Scheduled message cancelled');
   };
 
@@ -220,7 +236,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
     handleCancelScheduledMessage(scheduledMessage.id);
     setMessage(scheduledMessage.content);
     if (scheduledMessage.attachments) {
-      setSelectedFiles(scheduledMessage.attachments.map(file => ({ file })));
+      setSelectedFiles(scheduledMessage.attachments.map((file) => ({ file })));
     }
   };
 
@@ -250,14 +266,14 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
     onCancelEdit?.();
   };
 
-  const hasMediaFiles = selectedFiles.some(sf => 
-    sf.file.type.startsWith('image/') || sf.file.type.startsWith('video/')
+  const hasMediaFiles = selectedFiles.some(
+    (sf) => sf.file.type.startsWith('image/') || sf.file.type.startsWith('video/')
   );
 
   // Show voice recorder
   if (isRecording) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="border-t border-border bg-card p-3 sm:p-4"
@@ -325,10 +341,12 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-2 flex items-center gap-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-3 py-2 border border-purple-500/20"
+            className="mb-2 flex items-center gap-2 rounded-lg border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 px-3 py-2"
           >
             <Timer className="h-4 w-4 text-purple-400" />
-            <span className="text-xs text-purple-300">Messages will disappear after {activeConversation.vanishTimer}s</span>
+            <span className="text-xs text-purple-300">
+              Messages will disappear after {activeConversation.vanishTimer}s
+            </span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -346,7 +364,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
               {selectedFiles.map((sf, index) => {
                 const category = getFileCategory(sf.file.type);
                 const Icon = fileTypeIcons[category] || File;
-                
+
                 return (
                   <motion.div
                     key={index}
@@ -366,13 +384,13 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
-                    <span className="max-w-[80px] sm:max-w-[120px] truncate text-sm">
+                    <span className="max-w-[80px] truncate text-sm sm:max-w-[120px]">
                       {sf.file.name}
                     </span>
                     <button
                       type="button"
                       onClick={() => removeFile(index)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive/10"
+                      className="absolute right-1 top-1/2 -translate-y-1/2 rounded-full p-1 opacity-0 transition-opacity hover:bg-destructive/10 group-hover:opacity-100"
                     >
                       <X className="h-4 w-4 text-destructive" />
                     </button>
@@ -380,7 +398,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
                 );
               })}
             </div>
-            
+
             {/* View once toggle for media */}
             {hasMediaFiles && (
               <motion.button
@@ -403,7 +421,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
       </AnimatePresence>
 
       {/* Scheduled messages */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="mb-2 flex items-center gap-2">
         <ScheduledMessages
           scheduledMessages={scheduledMessages}
           onCancel={handleCancelScheduledMessage}
@@ -411,15 +429,15 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
           translate={translate}
         />
       </div>
-      
+
       {/* Input area */}
       <motion.div
-        animate={{ 
+        animate={{
           scale: isFocused ? 1.01 : 1,
-          boxShadow: isFocused ? '0 0 0 2px hsl(var(--primary) / 0.2)' : '0 0 0 0px transparent'
+          boxShadow: isFocused ? '0 0 0 2px hsl(var(--primary) / 0.2)' : '0 0 0 0px transparent',
         }}
         className={cn(
-          'flex items-end gap-1 sm:gap-2 rounded-2xl bg-secondary p-2 transition-all duration-200'
+          'flex items-end gap-1 rounded-2xl bg-secondary p-2 transition-all duration-200 sm:gap-2'
         )}
       >
         {/* Attachment menu */}
@@ -480,7 +498,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
             onClick={() => setIsRecording(true)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground hover:bg-muted-foreground/20 transition-all duration-200 touch-target"
+            className="touch-target flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-all duration-200 hover:bg-muted-foreground/20"
           >
             <Mic className="h-5 w-5" />
           </motion.button>
@@ -493,7 +511,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
             onClick={() => setShowScheduleModal(true)}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground hover:bg-amber-500/20 hover:text-amber-500 transition-all duration-200 touch-target"
+            className="touch-target flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground transition-all duration-200 hover:bg-amber-500/20 hover:text-amber-500"
             title="Schedule message"
           >
             <Clock className="h-5 w-5" />
@@ -507,10 +525,10 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            'flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200 touch-target',
+            'touch-target flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-all duration-200',
             message.trim() || selectedFiles.length > 0
-              ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25'
-              : 'bg-muted text-muted-foreground hidden'
+              ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90'
+              : 'hidden bg-muted text-muted-foreground'
           )}
         >
           <Send className="h-5 w-5" />

@@ -27,7 +27,7 @@ const TIMER_OPTIONS = [
 export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: VanishModeToggleProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const currentOption = TIMER_OPTIONS.find(o => o.value === timer) || TIMER_OPTIONS[2];
+  const currentOption = TIMER_OPTIONS.find((o) => o.value === timer) || TIMER_OPTIONS[2];
 
   const handleTimerSelect = (value: number) => {
     onToggle(true, value);
@@ -49,7 +49,7 @@ export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: Vani
           {isEnabled ? (
             <>
               <span className="hidden sm:inline">{translate('vanish.on')}</span>
-              <span className="opacity-75 hidden sm:inline">• {currentOption.label}</span>
+              <span className="hidden opacity-75 sm:inline">• {currentOption.label}</span>
               <ChevronDown className="h-3 w-3" />
             </>
           ) : (
@@ -58,10 +58,8 @@ export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: Vani
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
-          Message Timer
-        </div>
-        {TIMER_OPTIONS.map(option => (
+        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Message Timer</div>
+        {TIMER_OPTIONS.map((option) => (
           <DropdownMenuItem
             key={option.value}
             onClick={() => handleTimerSelect(option.value)}
@@ -75,10 +73,10 @@ export function VanishModeToggle({ isEnabled, timer, onToggle, translate }: Vani
         ))}
         {isEnabled && (
           <>
-            <div className="h-px bg-border my-1" />
+            <div className="my-1 h-px bg-border" />
             <DropdownMenuItem
               onClick={() => onToggle(false, timer)}
-              className="text-destructive focus:text-destructive cursor-pointer"
+              className="cursor-pointer text-destructive focus:text-destructive"
             >
               {translate('vanish.turnOff')}
             </DropdownMenuItem>

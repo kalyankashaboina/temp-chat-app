@@ -11,9 +11,6 @@ export interface CallResult {
   error?: string;
 }
 
-export function mockTypingIndicator(
-  _onStart: () => void,
-  _onEnd: () => void,
-): () => void {
+export function mockTypingIndicator(_onStart: () => void, _onEnd: () => void): () => void {
   return () => {};
 }

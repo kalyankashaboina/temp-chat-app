@@ -23,9 +23,9 @@ const buttonSizes = {
 
 const emojiVariants: Variants = {
   initial: { scale: 1 },
-  hover: { 
+  hover: {
     scale: 1.3,
-    transition: { type: 'spring', stiffness: 400, damping: 10 }
+    transition: { type: 'spring', stiffness: 400, damping: 10 },
   },
   tap: { scale: 0.9 },
 };
@@ -71,15 +71,21 @@ const getEmojiAnimation = (emoji: string): Variants => {
   const heartEmojis = ['❤️', '💕', '💖', '💗', '💓', '💞', '💝', '🧡', '💛', '💚', '💙', '💜'];
   const celebrateEmojis = ['🎉', '🎊', '🥳', '🎈', '✨', '🌟', '⭐'];
   const happyEmojis = ['😀', '😁', '😄', '😊', '🥰', '😍'];
-  
+
   if (heartEmojis.includes(emoji)) return pulseVariants;
   if (celebrateEmojis.includes(emoji)) return spinVariants;
   if (happyEmojis.includes(emoji)) return bounceVariants;
-  
+
   return emojiVariants;
 };
 
-export function AnimatedEmoji({ emoji, onClick, size = 'md', animate = true, className }: AnimatedEmojiProps) {
+export function AnimatedEmoji({
+  emoji,
+  onClick,
+  size = 'md',
+  animate = true,
+  className,
+}: AnimatedEmojiProps) {
   const animationVariant = animate ? getEmojiAnimation(emoji) : emojiVariants;
 
   return (
@@ -101,7 +107,7 @@ export function AnimatedEmoji({ emoji, onClick, size = 'md', animate = true, cla
         className={cn(sizeClasses[size], 'select-none')}
         variants={animationVariant}
         initial="initial"
-        animate={animate ? "animate" : "initial"}
+        animate={animate ? 'animate' : 'initial'}
       >
         {emoji}
       </motion.span>
@@ -113,7 +119,7 @@ export function AnimatedEmoji({ emoji, onClick, size = 'md', animate = true, cla
 export function EmojiBurst({ emoji, onComplete }: { emoji: string; onComplete: () => void }) {
   return (
     <motion.div
-      className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+      className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -123,19 +129,19 @@ export function EmojiBurst({ emoji, onComplete }: { emoji: string; onComplete: (
         <motion.span
           key={i}
           className="absolute text-3xl"
-          initial={{ 
-            x: 0, 
-            y: 0, 
+          initial={{
+            x: 0,
+            y: 0,
             scale: 0,
             rotate: 0,
           }}
-          animate={{ 
+          animate={{
             x: Math.cos((i / 8) * Math.PI * 2) * 100,
             y: Math.sin((i / 8) * Math.PI * 2) * 100,
             scale: [0, 1.5, 0],
             rotate: Math.random() * 360,
           }}
-          transition={{ 
+          transition={{
             duration: 0.8,
             ease: 'easeOut',
           }}
@@ -150,19 +156,19 @@ export function EmojiBurst({ emoji, onComplete }: { emoji: string; onComplete: (
 // Floating emoji for celebrations
 export function FloatingEmoji({ emoji, delay = 0 }: { emoji: string; delay?: number }) {
   const startX = Math.random() * 100;
-  
+
   return (
     <motion.span
-      className="fixed bottom-0 text-2xl pointer-events-none z-40"
+      className="pointer-events-none fixed bottom-0 z-40 text-2xl"
       style={{ left: `${startX}%` }}
       initial={{ y: 0, opacity: 1, scale: 0 }}
-      animate={{ 
+      animate={{
         y: -window.innerHeight - 100,
         opacity: [0, 1, 1, 0],
         scale: [0, 1, 1, 0.5],
         rotate: Math.random() * 360,
       }}
-      transition={{ 
+      transition={{
         duration: 3 + Math.random() * 2,
         delay,
         ease: 'easeOut',

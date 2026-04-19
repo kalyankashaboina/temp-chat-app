@@ -22,7 +22,7 @@ export function ScrollToBottomButton({ visible, onClick }: ScrollToBottomButtonP
             onClick={onClick}
             variant="secondary"
             size="icon"
-            className="rounded-full shadow-lg h-10 w-10 bg-card border border-border hover:bg-muted"
+            className="h-10 w-10 rounded-full border border-border bg-card shadow-lg hover:bg-muted"
           >
             <ChevronDown className="h-5 w-5" />
           </Button>

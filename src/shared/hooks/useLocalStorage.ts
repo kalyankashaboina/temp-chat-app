@@ -13,21 +13,26 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   });
 
   // Return a wrapped version of useState's setter that persists to localStorage
-  const setValue = useCallback((value: T | ((val: T) => T)) => {
-    try {
-      const valueToStore = value instanceof Function ? value(storedValue) : value;
-      setStoredValue(valueToStore);
-      localStorage.setItem(key, JSON.stringify(valueToStore));
-      
-      // Dispatch event for cross-tab sync
-      window.dispatchEvent(new StorageEvent('storage', {
-        key,
-        newValue: JSON.stringify(valueToStore),
-      }));
-    } catch (error) {
-      // removed console.warn
-    }
-  }, [key, storedValue]);
+  const setValue = useCallback(
+    (value: T | ((val: T) => T)) => {
+      try {
+        const valueToStore = value instanceof Function ? value(storedValue) : value;
+        setStoredValue(valueToStore);
+        localStorage.setItem(key, JSON.stringify(valueToStore));
+
+        // Dispatch event for cross-tab sync
+        window.dispatchEvent(
+          new StorageEvent('storage', {
+            key,
+            newValue: JSON.stringify(valueToStore),
+          })
+        );
+      } catch (error) {
+        // removed console.warn
+      }
+    },
+    [key, storedValue]
+  );
 
   // Remove value from localStorage
   const removeValue = useCallback(() => {

@@ -19,8 +19,14 @@ export interface UploadFileResult {
 }
 
 // Kept for schema compatibility — validation still used in chatSlice
-export interface FileValidationResult { valid: boolean; error?: string; }
-export interface PaginationCursor { before?: string; limit: number; }
+export interface FileValidationResult {
+  valid: boolean;
+  error?: string;
+}
+export interface PaginationCursor {
+  before?: string;
+  limit: number;
+}
 export interface PaginatedMessagesResult {
   messages: Message[];
   hasMore: boolean;
@@ -29,7 +35,8 @@ export interface PaginatedMessagesResult {
 
 export function validateFile(file: File): FileValidationResult {
   if (file.size > UPLOAD.MAX_SIZE_BYTES) return { valid: false, error: 'error.fileTooLarge' };
-  if (!UPLOAD.ALLOWED_MIMES.includes(file.type)) return { valid: false, error: 'error.unsupportedFile' };
+  if (!UPLOAD.ALLOWED_MIMES.includes(file.type))
+    return { valid: false, error: 'error.unsupportedFile' };
   return { valid: true };
 }
 
@@ -50,7 +57,7 @@ export function formatFileSize(bytes: number): string {
 // Upload via XHR with progress (uses chatApi.uploadFile internally)
 export function mockUploadFile(
   file: FileAttachment,
-  onProgress: (pct: number) => void,
+  onProgress: (pct: number) => void
 ): Promise<UploadFileResult> {
   // FileAttachment doesn't have the raw File — blob uploads are handled separately.
   // This stub is kept for chatSlice compatibility; real uploads go via chatApi.uploadFile.
@@ -72,7 +79,7 @@ export function mockReceiveReply(_content: string): Promise<Message> {
 export async function mockLoadOlderMessages(
   conversationId: string,
   cursor: PaginationCursor,
-  currentUserId = '',
+  currentUserId = ''
 ): Promise<PaginatedMessagesResult> {
   const result = await chatApi.getMessages(conversationId, cursor.before, currentUserId);
   return {

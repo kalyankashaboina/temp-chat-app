@@ -1,6 +1,6 @@
 /**
  * RTK Query API Slice - Central API management for Relay Chat
- * 
+ *
  * Features:
  * - Automatic caching and cache invalidation
  * - Optimistic updates for instant UI feedback
@@ -206,10 +206,7 @@ export const api = createApi({
     // AUTH ENDPOINTS
     // ====================================================================
 
-    login: builder.mutation<
-      { data: User },
-      { email: string; password: string }
-    >({
+    login: builder.mutation<{ data: User }, { email: string; password: string }>({
       query: (credentials) => ({
         url: '/auth/login',
         method: 'POST',
@@ -280,8 +277,7 @@ export const api = createApi({
         url: '/users',
         params: searchQuery ? { q: searchQuery } : undefined,
       }),
-      transformResponse: (response: { data: ApiUser[] }) =>
-        response.data.map(mapUser),
+      transformResponse: (response: { data: ApiUser[] }) => response.data.map(mapUser),
       providesTags: (result) =>
         result
           ? [
@@ -338,22 +334,17 @@ export const api = createApi({
         method: 'POST',
         body: data,
       }),
-      transformResponse: (response: { data: ApiConversation }) =>
-        mapConversation(response.data),
+      transformResponse: (response: { data: ApiConversation }) => mapConversation(response.data),
       invalidatesTags: [{ type: 'Conversation', id: 'LIST' }],
     }),
 
-    createGroupConversation: builder.mutation<
-      Conversation,
-      { name: string; memberIds: string[] }
-    >({
+    createGroupConversation: builder.mutation<Conversation, { name: string; memberIds: string[] }>({
       query: (data) => ({
         url: '/conversations/group',
         method: 'POST',
         body: data,
       }),
-      transformResponse: (response: { data: ApiConversation }) =>
-        mapConversation(response.data),
+      transformResponse: (response: { data: ApiConversation }) => mapConversation(response.data),
       invalidatesTags: [{ type: 'Conversation', id: 'LIST' }],
     }),
 
@@ -374,9 +365,7 @@ export const api = createApi({
         _meta,
         arg
       ): { messages: Message[]; nextCursor: string | null; hasMore: boolean } => ({
-        messages: (response.messages ?? []).map((m) =>
-          mapMessage(m, arg.currentUserId)
-        ),
+        messages: (response.messages ?? []).map((m) => mapMessage(m, arg.currentUserId)),
         nextCursor: response.nextCursor,
         hasMore: response.hasMore,
       }),
@@ -392,10 +381,7 @@ export const api = createApi({
           : [{ type: 'Message', id: `LIST-${arg.conversationId}` }],
     }),
 
-    getPinnedMessages: builder.query<
-      Message[],
-      { conversationId: string; currentUserId: string }
-    >({
+    getPinnedMessages: builder.query<Message[], { conversationId: string; currentUserId: string }>({
       query: ({ conversationId }) => `/conversations/${conversationId}/pinned`,
       transformResponse: (response: { data: ApiMessage[] }, _meta, arg) =>
         response.data.map((m) => mapMessage(m, arg.currentUserId)),
@@ -452,10 +438,7 @@ export const api = createApi({
       ],
     }),
 
-    forwardMessage: builder.mutation<
-      void,
-      { messageId: string; toConversationId: string }
-    >({
+    forwardMessage: builder.mutation<void, { messageId: string; toConversationId: string }>({
       query: ({ messageId, toConversationId }) => ({
         url: `/messages/${messageId}/forward`,
         method: 'POST',

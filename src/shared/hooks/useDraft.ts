@@ -38,37 +38,40 @@ export function useDraft(conversationId: string | null) {
     }
   }, []);
 
-  const saveDraft = useCallback((content: string) => {
-    if (!conversationId) return;
+  const saveDraft = useCallback(
+    (content: string) => {
+      if (!conversationId) return;
 
-    // Clear existing timeout
-    if (saveTimeout.current) {
-      clearTimeout(saveTimeout.current);
-    }
-
-    // Debounced save
-    saveTimeout.current = setTimeout(() => {
-      const drafts = getDrafts();
-      
-      if (content.trim()) {
-        drafts[conversationId] = {
-          content,
-          conversationId,
-          timestamp: Date.now(),
-        };
-      } else {
-        delete drafts[conversationId];
+      // Clear existing timeout
+      if (saveTimeout.current) {
+        clearTimeout(saveTimeout.current);
       }
 
-      try {
-        localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
-      } catch (e) {
-        // removed console.warn
-      }
-    }, AUTO_SAVE_DELAY);
+      // Debounced save
+      saveTimeout.current = setTimeout(() => {
+        const drafts = getDrafts();
 
-    setDraft(content);
-  }, [conversationId, getDrafts]);
+        if (content.trim()) {
+          drafts[conversationId] = {
+            content,
+            conversationId,
+            timestamp: Date.now(),
+          };
+        } else {
+          delete drafts[conversationId];
+        }
+
+        try {
+          localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(drafts));
+        } catch (e) {
+          // removed console.warn
+        }
+      }, AUTO_SAVE_DELAY);
+
+      setDraft(content);
+    },
+    [conversationId, getDrafts]
+  );
 
   const clearDraft = useCallback(() => {
     if (!conversationId) return;

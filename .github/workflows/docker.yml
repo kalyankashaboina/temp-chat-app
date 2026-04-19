@@ -1,31 +1,25 @@
-name: Docker → Build & Push (Production Artifact)
+name: Docker Build & Push
 
 on:
   workflow_run:
-    workflows:
-      - 'CI → CD → Vercel (Production)'
+    workflows: ["Frontend CI"]
     types:
       - completed
 
 jobs:
-  docker-build-push:
+  docker:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
 
-    # Run ONLY if:
-    # - CI workflow succeeded
-    # - Trigger was a push
-    # - Branch is master
     if: >
       github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'master'
+      github.event.workflow_run.head_branch == 'main'
 
     env:
       IMAGE_NAME: relay-chat
 
     steps:
-      - name: Checkout same commit as CI
+      - name: Checkout same commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
@@ -39,16 +33,16 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Generate Docker tags & labels
+      - name: Generate tags
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,format=short
+            type=sha
             type=ref,event=branch
 
-      - name: Build and push Docker image
+      - name: Build and Push
         uses: docker/build-push-action@v6
         with:
           context: .

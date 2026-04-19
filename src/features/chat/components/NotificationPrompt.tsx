@@ -42,23 +42,23 @@ export function NotificationPrompt({ translate }: NotificationPromptProps) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 50, scale: 0.95 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="fixed bottom-20 left-4 right-4 md:left-auto md:right-4 md:w-80 z-50"
+          className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-80"
         >
-          <div className="bg-card border border-border rounded-xl p-4 shadow-xl backdrop-blur-lg">
+          <div className="rounded-xl border border-border bg-card p-4 shadow-xl backdrop-blur-lg">
             <button
               onClick={handleDismiss}
-              className="absolute top-2 right-2 p-1 rounded-full hover:bg-muted transition-colors"
+              className="absolute right-2 top-2 rounded-full p-1 transition-colors hover:bg-muted"
             >
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
-            
+
             <div className="flex gap-3">
-              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
                 <Bell className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-sm mb-1">{translate('notification.enable')}</h4>
-                <p className="text-xs text-muted-foreground mb-3">
+                <h4 className="mb-1 text-sm font-semibold">{translate('notification.enable')}</h4>
+                <p className="mb-3 text-xs text-muted-foreground">
                   {translate('notification.enableDesc')}
                 </p>
                 <div className="flex gap-2">

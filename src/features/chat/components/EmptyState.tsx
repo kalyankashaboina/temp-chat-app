@@ -43,21 +43,21 @@ export function EmptyState({ type, title, description, className }: EmptyStatePr
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-      className={cn('flex flex-col items-center justify-center text-center px-4', className)}
+      className={cn('flex flex-col items-center justify-center px-4 text-center', className)}
     >
       {/* Animated icon container */}
-      <motion.div 
+      <motion.div
         className={cn(
-          'relative mb-6 h-24 w-24 rounded-full bg-gradient-to-br flex items-center justify-center',
+          'relative mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br',
           gradient
         )}
-        animate={{ 
+        animate={{
           scale: [1, 1.05, 1],
         }}
-        transition={{ 
-          duration: 3, 
-          repeat: Infinity, 
-          ease: 'easeInOut' 
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: 'easeInOut',
         }}
       >
         {/* Pulse rings */}
@@ -77,32 +77,32 @@ export function EmptyState({ type, title, description, className }: EmptyStatePr
             }}
           />
         ))}
-        
+
         {/* Icon */}
         <motion.div
-          animate={{ 
+          animate={{
             y: [0, -4, 0],
           }}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity, 
-            ease: 'easeInOut' 
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
           }}
         >
           <Icon className={cn('h-12 w-12', iconColor)} />
         </motion.div>
-        
+
         {/* Floating sparkles */}
         <motion.div
-          className="absolute -top-1 -right-1"
-          animate={{ 
+          className="absolute -right-1 -top-1"
+          animate={{
             rotate: [0, 15, -15, 0],
             scale: [1, 1.2, 1],
           }}
-          transition={{ 
-            duration: 2, 
-            repeat: Infinity, 
-            ease: 'easeInOut' 
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut',
           }}
         >
           <Sparkles className="h-5 w-5 text-primary/40" />
@@ -110,17 +110,17 @@ export function EmptyState({ type, title, description, className }: EmptyStatePr
       </motion.div>
 
       {/* Text content */}
-      <motion.h3 
-        className="text-lg font-semibold text-foreground mb-2"
+      <motion.h3
+        className="mb-2 text-lg font-semibold text-foreground"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
         {title}
       </motion.h3>
-      
-      <motion.p 
-        className="text-sm text-muted-foreground max-w-[250px]"
+
+      <motion.p
+        className="max-w-[250px] text-sm text-muted-foreground"
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
@@ -132,30 +132,30 @@ export function EmptyState({ type, title, description, className }: EmptyStatePr
 }
 
 // Compact version for smaller spaces
-export function EmptyStateCompact({ 
-  icon: Icon, 
-  message, 
-  submessage 
-}: { 
-  icon: React.ElementType; 
-  message: string; 
+export function EmptyStateCompact({
+  icon: Icon,
+  message,
+  submessage,
+}: {
+  icon: React.ElementType;
+  message: string;
   submessage?: string;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center justify-center h-40 text-muted-foreground"
+      className="flex h-40 flex-col items-center justify-center text-muted-foreground"
     >
-      <motion.div 
-        className="h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center mb-3"
+      <motion.div
+        className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50"
         animate={{ scale: [1, 1.05, 1] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
         <Icon className="h-6 w-6 opacity-50" />
       </motion.div>
       <p className="text-sm font-medium">{message}</p>
-      {submessage && <p className="text-xs mt-1">{submessage}</p>}
+      {submessage && <p className="mt-1 text-xs">{submessage}</p>}
     </motion.div>
   );
 }

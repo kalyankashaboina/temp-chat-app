@@ -4,7 +4,14 @@ import { ArrowLeft, Key, Shield, Trash2, AlertTriangle, Loader2, Eye, EyeOff } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { mockProfileApi } from '@/features/profile/profileService';
 import { toast } from 'sonner';
 
@@ -18,7 +25,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [showDeleteAccount, setShowDeleteAccount] = useState(false);
   const [showTwoFactor, setShowTwoFactor] = useState(false);
-  
+
   // Password form
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -26,7 +33,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   // Delete account
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
@@ -138,10 +145,15 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-lg w-[95vw] sm:w-full h-[90vh] max-h-[700px] p-0 gap-0 overflow-hidden flex flex-col">
-          <DialogHeader className="p-3 sm:p-4 border-b border-border flex-shrink-0">
+        <DialogContent className="flex h-[90vh] max-h-[700px] w-[95vw] max-w-lg flex-col gap-0 overflow-hidden p-0 sm:w-full">
+          <DialogHeader className="flex-shrink-0 border-b border-border p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 sm:h-10 sm:w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 sm:h-10 sm:w-10"
+              >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <DialogTitle className="text-base sm:text-lg">Account</DialogTitle>
@@ -153,7 +165,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               {accountItems.map((item, index) => {
                 const Icon = item.icon;
                 const isDestructive = item.color === 'destructive';
-                
+
                 return (
                   <motion.button
                     key={item.label}
@@ -161,21 +173,27 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={item.action}
-                    className="w-full flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:bg-muted/50 transition-colors text-left"
+                    className="flex w-full items-center gap-4 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-muted/50"
                   >
-                    <div className={`p-2.5 rounded-lg ${isDestructive ? 'bg-destructive/10' : 'bg-primary/10'}`}>
-                      <Icon className={`h-5 w-5 ${isDestructive ? 'text-destructive' : 'text-primary'}`} />
+                    <div
+                      className={`rounded-lg p-2.5 ${isDestructive ? 'bg-destructive/10' : 'bg-primary/10'}`}
+                    >
+                      <Icon
+                        className={`h-5 w-5 ${isDestructive ? 'text-destructive' : 'text-primary'}`}
+                      />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium ${isDestructive ? 'text-destructive' : 'text-foreground'}`}>
+                    <div className="min-w-0 flex-1">
+                      <p
+                        className={`text-sm font-medium ${isDestructive ? 'text-destructive' : 'text-foreground'}`}
+                      >
                         {item.label}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
                         {item.description}
                       </p>
                     </div>
                     {item.badge && (
-                      <span className="text-xs font-medium bg-primary/10 text-primary px-2 py-1 rounded">
+                      <span className="rounded bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
                         {item.badge}
                       </span>
                     )}
@@ -189,10 +207,10 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-8 p-4 bg-muted/50 rounded-xl"
+              className="mt-8 rounded-xl bg-muted/50 p-4"
             >
-              <h4 className="text-sm font-medium mb-2">Security Tips</h4>
-              <ul className="text-xs text-muted-foreground space-y-1.5">
+              <h4 className="mb-2 text-sm font-medium">Security Tips</h4>
+              <ul className="space-y-1.5 text-xs text-muted-foreground">
                 <li>• Use a unique password you don't use elsewhere</li>
                 <li>• Enable two-factor authentication for extra security</li>
                 <li>• Never share your password with anyone</li>
@@ -208,11 +226,9 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Enter your current password and choose a new one
-            </DialogDescription>
+            <DialogDescription>Enter your current password and choose a new one</DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Current Password</Label>
@@ -228,7 +244,11 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 >
-                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showCurrentPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -269,7 +289,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               Cancel
             </Button>
             <Button onClick={handleChangePassword} disabled={isChangingPassword}>
-              {isChangingPassword && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isChangingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Change Password
             </Button>
           </DialogFooter>
@@ -285,11 +305,11 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               Enter the 6-digit code from your authenticator app
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
-            <div className="bg-muted p-4 rounded-lg text-center">
-              <p className="text-sm text-muted-foreground mb-2">Your secret key:</p>
-              <code className="text-primary font-mono">{twoFactorSecret}</code>
+            <div className="rounded-lg bg-muted p-4 text-center">
+              <p className="mb-2 text-sm text-muted-foreground">Your secret key:</p>
+              <code className="font-mono text-primary">{twoFactorSecret}</code>
             </div>
 
             <div className="space-y-2">
@@ -308,9 +328,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
             <Button variant="outline" onClick={() => setShowTwoFactor(false)}>
               Cancel
             </Button>
-            <Button onClick={handleConfirmTwoFactor}>
-              Verify & Enable
-            </Button>
+            <Button onClick={handleConfirmTwoFactor}>Verify & Enable</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -327,7 +345,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               This action cannot be undone. All your data will be permanently deleted.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Password</Label>
@@ -358,7 +376,7 @@ export function AccountSettingsScreen({ open, onClose, onLogout }: AccountSettin
               onClick={handleDeleteAccount}
               disabled={isDeleting || deleteConfirmText !== 'DELETE'}
             >
-              {isDeleting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Delete Account
             </Button>
           </DialogFooter>

@@ -21,19 +21,19 @@ interface DeviceInfo {
 
 function getPlatform(): Platform {
   const ua = navigator.userAgent.toLowerCase();
-  
+
   if (/iphone|ipad|ipod/.test(ua)) return 'ios';
   if (/android/.test(ua)) return 'android';
   if (/win/.test(ua)) return 'windows';
   if (/mac/.test(ua)) return 'macos';
   if (/linux/.test(ua)) return 'linux';
-  
+
   return 'unknown';
 }
 
 function getDeviceType(): DeviceType {
   const width = window.innerWidth;
-  
+
   if (width < 768) return 'mobile';
   if (width < 1024) return 'tablet';
   return 'desktop';
@@ -44,8 +44,9 @@ export function useDeviceInfo(): DeviceInfo {
     platform: getPlatform(),
     deviceType: getDeviceType(),
     isTouchDevice: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
-    isStandalone: window.matchMedia('(display-mode: standalone)').matches ||
-                  (window.navigator as Navigator & { standalone?: boolean }).standalone === true,
+    isStandalone:
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as Navigator & { standalone?: boolean }).standalone === true,
     screenWidth: window.innerWidth,
     screenHeight: window.innerHeight,
     pixelRatio: window.devicePixelRatio || 1,
@@ -59,7 +60,7 @@ export function useDeviceInfo(): DeviceInfo {
 
   useEffect(() => {
     const handleResize = () => {
-      setDeviceInfo(prev => ({
+      setDeviceInfo((prev) => ({
         ...prev,
         deviceType: getDeviceType(),
         screenWidth: window.innerWidth,
@@ -69,12 +70,12 @@ export function useDeviceInfo(): DeviceInfo {
 
     const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const handleMotionChange = (e: MediaQueryListEvent) => {
-      setDeviceInfo(prev => ({ ...prev, prefersReducedMotion: e.matches }));
+      setDeviceInfo((prev) => ({ ...prev, prefersReducedMotion: e.matches }));
     };
 
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleDarkChange = (e: MediaQueryListEvent) => {
-      setDeviceInfo(prev => ({ ...prev, prefersDarkMode: e.matches }));
+      setDeviceInfo((prev) => ({ ...prev, prefersDarkMode: e.matches }));
     };
 
     window.addEventListener('resize', handleResize);

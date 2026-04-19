@@ -20,7 +20,7 @@ interface NetworkConnection {
 export function useNetworkStatus() {
   const getNetworkInfo = useCallback((): NetworkInfo => {
     const connection = (navigator as Navigator & { connection?: NetworkConnection }).connection;
-    
+
     return {
       isOnline: navigator.onLine,
       effectiveType: (connection?.effectiveType as NetworkInfo['effectiveType']) || 'unknown',
@@ -48,7 +48,8 @@ export function useNetworkStatus() {
     };
   }, [getNetworkInfo]);
 
-  const isSlowConnection = networkInfo.effectiveType === '2g' || networkInfo.effectiveType === 'slow-2g';
+  const isSlowConnection =
+    networkInfo.effectiveType === '2g' || networkInfo.effectiveType === 'slow-2g';
   const shouldReduceData = networkInfo.saveData || isSlowConnection;
 
   return {

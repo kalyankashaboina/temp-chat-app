@@ -34,10 +34,10 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
 
   const updateWaveform = useCallback(() => {
     if (!analyserRef.current) return;
-    
+
     const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
     analyserRef.current.getByteFrequencyData(dataArray);
-    
+
     // Sample 30 values from the frequency data
     const samples: number[] = [];
     const step = Math.floor(dataArray.length / 30);
@@ -45,7 +45,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
       const value = dataArray[i * step] / 255;
       samples.push(Math.max(value, 0.1));
     }
-    
+
     setWaveformData(samples);
     animationRef.current = requestAnimationFrame(updateWaveform);
   }, []);
@@ -53,16 +53,19 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      
+
       // Set up audio analysis for waveform
-      const audioContext = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+      const audioContext = new (
+        window.AudioContext ||
+        (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+      )();
       audioContextRef.current = audioContext;
       const source = audioContext.createMediaStreamSource(stream);
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 256;
       source.connect(analyser);
       analyserRef.current = analyser;
-      
+
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -77,7 +80,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
         if (animationRef.current) cancelAnimationFrame(animationRef.current);
       };
 
@@ -87,9 +90,9 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
       setDuration(0);
 
       timerRef.current = setInterval(() => {
-        setDuration(d => d + 1);
+        setDuration((d) => d + 1);
       }, 1000);
-      
+
       // Start waveform animation
       updateWaveform();
     } catch (error) {
@@ -117,7 +120,7 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
       mediaRecorderRef.current.resume();
       setIsPaused(false);
       timerRef.current = setInterval(() => {
-        setDuration(d => d + 1);
+        setDuration((d) => d + 1);
       }, 1000);
       updateWaveform();
     }
@@ -160,30 +163,30 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
   // Recorded audio preview
   if (audioBlob && audioUrl) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3 bg-secondary rounded-2xl p-3"
+        className="flex items-center gap-3 rounded-2xl bg-secondary p-3"
       >
         <button
           onClick={resetRecorder}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors touch-target"
+          className="touch-target flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10 text-destructive transition-colors hover:bg-destructive/20"
         >
           <Trash2 className="h-5 w-5" />
         </button>
-        
+
         <div className="flex-1">
-          <audio src={audioUrl} controls className="w-full h-8" />
+          <audio src={audioUrl} controls className="h-8 w-full" />
         </div>
-        
-        <span className="text-sm font-medium text-muted-foreground min-w-[40px]">
+
+        <span className="min-w-[40px] text-sm font-medium text-muted-foreground">
           {formatDuration(duration)}
         </span>
-        
+
         <motion.button
           onClick={handleSend}
           whileTap={{ scale: 0.95 }}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-lg touch-target"
+          className="touch-target flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-colors hover:bg-primary/90"
         >
           <Send className="h-5 w-5" />
         </motion.button>
@@ -192,56 +195,55 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
   }
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-3 bg-secondary rounded-2xl p-3"
+      className="flex items-center gap-3 rounded-2xl bg-secondary p-3"
     >
       {/* Cancel button */}
       <button
         onClick={onCancel}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted-foreground/20 transition-colors touch-target"
+        className="touch-target flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-muted-foreground/20"
       >
         <X className="h-5 w-5" />
       </button>
-      
-      <div className="flex-1 flex items-center gap-3">
+
+      <div className="flex flex-1 items-center gap-3">
         {/* Recording indicator and waveform */}
         <AnimatePresence>
           {isRecording && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex items-center gap-3 flex-1"
+              className="flex flex-1 items-center gap-3"
             >
               <div className="flex items-center gap-2">
-                <motion.div 
+                <motion.div
                   animate={{ scale: isPaused ? 1 : [1, 1.2, 1] }}
                   transition={{ duration: 1, repeat: Infinity }}
-                  className={cn(
-                    "h-3 w-3 rounded-full",
-                    isPaused ? "bg-warning" : "bg-destructive"
-                  )} 
+                  className={cn('h-3 w-3 rounded-full', isPaused ? 'bg-warning' : 'bg-destructive')}
                 />
-                <span className={cn(
-                  "text-sm font-medium",
-                  isPaused ? "text-warning" : "text-destructive"
-                )}>
+                <span
+                  className={cn(
+                    'text-sm font-medium',
+                    isPaused ? 'text-warning' : 'text-destructive'
+                  )}
+                >
                   {isPaused ? 'Paused' : 'Recording'}
                 </span>
               </div>
-              
+
               {/* Live waveform */}
-              <div className="flex-1 flex items-center gap-[2px] h-8">
+              <div className="flex h-8 flex-1 items-center gap-[2px]">
                 {waveformData.map((height, i) => (
                   <motion.div
                     key={i}
-                    animate={{ 
+                    animate={{
                       scaleY: isPaused ? 0.3 : height,
                     }}
                     transition={{ duration: 0.05 }}
-                    className="flex-1 bg-primary rounded-full origin-center"
+                    className="flex-1 origin-center rounded-full bg-primary"
                     style={{
                       height: '100%',
                       minWidth: '2px',
@@ -253,29 +255,29 @@ export function VoiceRecorder({ onSend, onCancel, translate }: VoiceRecorderProp
             </motion.div>
           )}
         </AnimatePresence>
-        
+
         {/* Duration */}
-        <span className="text-sm font-medium text-muted-foreground min-w-[40px]">
+        <span className="min-w-[40px] text-sm font-medium text-muted-foreground">
           {formatDuration(duration)}
         </span>
       </div>
-      
+
       {/* Pause/Resume button */}
       {isRecording && (
         <button
           onClick={isPaused ? resumeRecording : pauseRecording}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-muted-foreground/20 transition-colors touch-target"
+          className="touch-target flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-muted-foreground/20"
         >
           {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
         </button>
       )}
-      
+
       {/* Record/Stop button */}
       <motion.button
         onClick={isRecording ? stopRecording : startRecording}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'flex h-12 w-12 items-center justify-center rounded-full transition-all shadow-lg touch-target',
+          'touch-target flex h-12 w-12 items-center justify-center rounded-full shadow-lg transition-all',
           isRecording
             ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
             : 'bg-primary text-primary-foreground hover:bg-primary/90'

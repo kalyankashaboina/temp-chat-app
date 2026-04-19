@@ -9,10 +9,141 @@ interface EmojiPickerProps {
 }
 
 const EMOJI_CATEGORIES = {
-  smileys: ['😀', '😁', '😂', '🤣', '😃', '😄', '😅', '😆', '😉', '😊', '😋', '😎', '😍', '🥰', '😘', '😗', '😙', '😚', '🙂', '🤗', '🤩', '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '🥱', '😴', '😌', '😛', '😜', '😝', '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲'],
-  gestures: ['👍', '👎', '👌', '🤌', '✌️', '🤞', '🤟', '🤘', '🤙', '👈', '👉', '👆', '👇', '☝️', '👋', '🤚', '🖐️', '✋', '🖖', '👏', '🙌', '👐', '🤲', '🤝', '🙏', '✍️', '💪', '🦾', '🦿'],
-  hearts: ['❤️', '🧡', '💛', '💚', '💙', '💜', '🖤', '🤍', '🤎', '💔', '❣️', '💕', '💞', '💓', '💗', '💖', '💘', '💝', '💟'],
-  objects: ['🎉', '🎊', '🎈', '🎁', '🏆', '⭐', '✨', '💡', '🔥', '💯', '✅', '❌', '⚠️', '📌', '📍', '💬', '💭', '🗯️', '📱', '💻', '⌨️', '🖥️', '📷', '📹', '🎵', '🎶', '🎤', '🎧', '📞', '📧'],
+  smileys: [
+    '😀',
+    '😁',
+    '😂',
+    '🤣',
+    '😃',
+    '😄',
+    '😅',
+    '😆',
+    '😉',
+    '😊',
+    '😋',
+    '😎',
+    '😍',
+    '🥰',
+    '😘',
+    '😗',
+    '😙',
+    '😚',
+    '🙂',
+    '🤗',
+    '🤩',
+    '🤔',
+    '🤨',
+    '😐',
+    '😑',
+    '😶',
+    '🙄',
+    '😏',
+    '😣',
+    '😥',
+    '😮',
+    '🤐',
+    '😯',
+    '😪',
+    '😫',
+    '🥱',
+    '😴',
+    '😌',
+    '😛',
+    '😜',
+    '😝',
+    '🤤',
+    '😒',
+    '😓',
+    '😔',
+    '😕',
+    '🙃',
+    '🤑',
+    '😲',
+  ],
+  gestures: [
+    '👍',
+    '👎',
+    '👌',
+    '🤌',
+    '✌️',
+    '🤞',
+    '🤟',
+    '🤘',
+    '🤙',
+    '👈',
+    '👉',
+    '👆',
+    '👇',
+    '☝️',
+    '👋',
+    '🤚',
+    '🖐️',
+    '✋',
+    '🖖',
+    '👏',
+    '🙌',
+    '👐',
+    '🤲',
+    '🤝',
+    '🙏',
+    '✍️',
+    '💪',
+    '🦾',
+    '🦿',
+  ],
+  hearts: [
+    '❤️',
+    '🧡',
+    '💛',
+    '💚',
+    '💙',
+    '💜',
+    '🖤',
+    '🤍',
+    '🤎',
+    '💔',
+    '❣️',
+    '💕',
+    '💞',
+    '💓',
+    '💗',
+    '💖',
+    '💘',
+    '💝',
+    '💟',
+  ],
+  objects: [
+    '🎉',
+    '🎊',
+    '🎈',
+    '🎁',
+    '🏆',
+    '⭐',
+    '✨',
+    '💡',
+    '🔥',
+    '💯',
+    '✅',
+    '❌',
+    '⚠️',
+    '📌',
+    '📍',
+    '💬',
+    '💭',
+    '🗯️',
+    '📱',
+    '💻',
+    '⌨️',
+    '🖥️',
+    '📷',
+    '📹',
+    '🎵',
+    '🎶',
+    '🎤',
+    '🎧',
+    '📞',
+    '📧',
+  ],
 };
 
 const emojiAnimations: Record<string, { scale: number[]; rotate?: number[] }> = {
@@ -55,12 +186,12 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
 
   const handleEmojiClick = (emoji: string) => {
     onEmojiSelect(emoji);
-    
+
     // Update recent emojis
-    const updated = [emoji, ...recentEmojis.filter(e => e !== emoji)].slice(0, 8);
+    const updated = [emoji, ...recentEmojis.filter((e) => e !== emoji)].slice(0, 8);
     setRecentEmojis(updated);
     localStorage.setItem('recent_emojis', JSON.stringify(updated));
-    
+
     setIsOpen(false);
   };
 
@@ -78,7 +209,7 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground touch-target"
+        className="touch-target flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
       >
         <Smile className="h-5 w-5" />
       </motion.button>
@@ -95,7 +226,7 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
             {/* Recent emojis */}
             {recentEmojis.length > 0 && (
               <div className="border-b border-border p-2">
-                <p className="text-xs text-muted-foreground mb-1 px-1">Recent</p>
+                <p className="mb-1 px-1 text-xs text-muted-foreground">Recent</p>
                 <div className="flex flex-wrap gap-1">
                   {recentEmojis.map((emoji, index) => {
                     const animation = emojiAnimations[emoji];
@@ -104,10 +235,14 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
                         key={`recent-${emoji}-${index}`}
                         type="button"
                         onClick={() => handleEmojiClick(emoji)}
-                        whileHover={animation ? { 
-                          scale: animation.scale,
-                          rotate: animation.rotate,
-                        } : { scale: 1.2 }}
+                        whileHover={
+                          animation
+                            ? {
+                                scale: animation.scale,
+                                rotate: animation.rotate,
+                              }
+                            : { scale: 1.2 }
+                        }
                         whileTap={{ scale: 0.9 }}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-lg transition-colors hover:bg-muted"
                       >
@@ -121,23 +256,25 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
 
             {/* Category tabs */}
             <div className="flex border-b border-border p-1">
-              {(Object.keys(EMOJI_CATEGORIES) as Array<keyof typeof EMOJI_CATEGORIES>).map((category) => (
-                <motion.button
-                  key={category}
-                  type="button"
-                  onClick={() => setActiveCategory(category)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  className={cn(
-                    'flex-1 rounded-lg p-2 text-lg transition-colors',
-                    activeCategory === category
-                      ? 'bg-primary/10 text-foreground'
-                      : 'text-muted-foreground hover:bg-muted'
-                  )}
-                >
-                  {categoryIcons[category]}
-                </motion.button>
-              ))}
+              {(Object.keys(EMOJI_CATEGORIES) as Array<keyof typeof EMOJI_CATEGORIES>).map(
+                (category) => (
+                  <motion.button
+                    key={category}
+                    type="button"
+                    onClick={() => setActiveCategory(category)}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    className={cn(
+                      'flex-1 rounded-lg p-2 text-lg transition-colors',
+                      activeCategory === category
+                        ? 'bg-primary/10 text-foreground'
+                        : 'text-muted-foreground hover:bg-muted'
+                    )}
+                  >
+                    {categoryIcons[category]}
+                  </motion.button>
+                )
+              )}
             </div>
 
             {/* Emoji grid */}
@@ -152,10 +289,14 @@ export function EmojiPicker({ onEmojiSelect, className }: EmojiPickerProps) {
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: index * 0.01 }}
-                    whileHover={animation ? { 
-                      scale: animation.scale,
-                      rotate: animation.rotate,
-                    } : { scale: 1.2 }}
+                    whileHover={
+                      animation
+                        ? {
+                            scale: animation.scale,
+                            rotate: animation.rotate,
+                          }
+                        : { scale: 1.2 }
+                    }
                     whileTap={{ scale: 0.9 }}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-lg transition-colors hover:bg-muted"
                   >

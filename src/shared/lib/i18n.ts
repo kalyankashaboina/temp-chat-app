@@ -1,6 +1,6 @@
 import { Language } from '@/features/chat/types';
 
-type TranslationKey = 
+type TranslationKey =
   | 'app.title'
   | 'status.online'
   | 'status.offline'
@@ -363,7 +363,8 @@ const translations: Record<Language, Translations> = {
     'forward.selectConversation': 'Select a conversation',
     'encryption.enabled': 'End-to-end encrypted',
     'encryption.disabled': 'Not encrypted',
-    'encryption.banner': 'Messages are end-to-end encrypted. No one outside of this chat can read them.',
+    'encryption.banner':
+      'Messages are end-to-end encrypted. No one outside of this chat can read them.',
     'encryption.info': 'Encryption info',
     'draft.saved': 'Draft saved',
     'draft.clear': 'Clear',

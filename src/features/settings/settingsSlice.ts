@@ -14,7 +14,7 @@ interface SettingsState {
   typingIndicators: boolean;
   mediaAutoDownload: boolean;
   fontSize: 'small' | 'medium' | 'large';
-  
+
   // Loading states
   isLoading: boolean;
   isSaving: boolean;

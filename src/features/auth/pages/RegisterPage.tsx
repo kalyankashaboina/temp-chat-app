@@ -19,11 +19,11 @@ export default function RegisterPage() {
   const [register, { isLoading }] = useRegisterMutation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const language = useAppSelector(state => state.settings?.language || 'en');
+  const language = useAppSelector((state) => state.settings?.language || 'en');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Zod validation
     const parsed = registerSchema.safeParse({ name, email, password, confirmPassword });
     if (!parsed.success) {
@@ -37,7 +37,7 @@ export default function RegisterPage() {
         email: parsed.data.email,
         password: parsed.data.password,
       }).unwrap();
-      
+
       dispatch(setUser(result.data));
       toast.success('Account created successfully!');
       navigate('/');
@@ -118,9 +118,7 @@ export default function RegisterPage() {
                   disabled={isLoading}
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Must be at least 8 characters
-              </p>
+              <p className="text-xs text-muted-foreground">Must be at least 8 characters</p>
             </div>
 
             <div className="space-y-2">
@@ -142,12 +140,7 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            size="lg"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -167,7 +160,7 @@ export default function RegisterPage() {
           {t('auth.hasAccount', language)}{' '}
           <Link
             to="/login"
-            className="font-medium text-primary hover:text-primary/80 transition-colors"
+            className="font-medium text-primary transition-colors hover:text-primary/80"
           >
             {t('action.login', language)}
           </Link>

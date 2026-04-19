@@ -1,12 +1,7 @@
 import { Shield, ShieldCheck, Lock, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface EncryptionIndicatorProps {
   isEncrypted?: boolean;
@@ -14,7 +9,11 @@ interface EncryptionIndicatorProps {
   translate: (key: string) => string;
 }
 
-export function EncryptionIndicator({ isEncrypted = true, compact = false, translate }: EncryptionIndicatorProps) {
+export function EncryptionIndicator({
+  isEncrypted = true,
+  compact = false,
+  translate,
+}: EncryptionIndicatorProps) {
   if (compact) {
     return (
       <TooltipProvider>
@@ -43,8 +42,8 @@ export function EncryptionIndicator({ isEncrypted = true, compact = false, trans
       className={cn(
         'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium',
         isEncrypted
-          ? 'bg-green-500/10 text-green-500 border border-green-500/20'
-          : 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+          ? 'border border-green-500/20 bg-green-500/10 text-green-500'
+          : 'border border-amber-500/20 bg-amber-500/10 text-amber-500'
       )}
     >
       {isEncrypted ? (
@@ -56,13 +55,13 @@ export function EncryptionIndicator({ isEncrypted = true, compact = false, trans
             <ShieldCheck className="h-3.5 w-3.5" />
           </motion.div>
           <span>{translate('encryption.enabled')}</span>
-          <Lock className="h-3 w-3 ml-1" />
+          <Lock className="ml-1 h-3 w-3" />
         </>
       ) : (
         <>
           <Shield className="h-3.5 w-3.5" />
           <span>{translate('encryption.disabled')}</span>
-          <Info className="h-3 w-3 ml-1" />
+          <Info className="ml-1 h-3 w-3" />
         </>
       )}
     </motion.div>
@@ -74,7 +73,7 @@ export function EncryptionBanner({ translate }: { translate: (key: string) => st
     <motion.div
       initial={{ opacity: 0, height: 0 }}
       animate={{ opacity: 1, height: 'auto' }}
-      className="flex items-center justify-center gap-2 py-2 px-4 bg-gradient-to-r from-green-500/5 via-green-500/10 to-green-500/5 border-y border-green-500/10 text-green-600 text-xs"
+      className="flex items-center justify-center gap-2 border-y border-green-500/10 bg-gradient-to-r from-green-500/5 via-green-500/10 to-green-500/5 px-4 py-2 text-xs text-green-600"
     >
       <Lock className="h-3 w-3" />
       <span>{translate('encryption.banner')}</span>

@@ -65,7 +65,10 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
     }
   };
 
-  const handleVisibilityChange = async (type: 'lastSeen' | 'profilePhoto' | 'about', value: VisibilityOption) => {
+  const handleVisibilityChange = async (
+    type: 'lastSeen' | 'profilePhoto' | 'about',
+    value: VisibilityOption
+  ) => {
     if (!settings) return;
     const key = `${type}Visibility` as keyof PrivacySettings;
     try {
@@ -81,7 +84,7 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
   const handleUnblock = async (userId: string) => {
     try {
       await mockProfileApi.unblockUser(userId);
-      setBlockedUsers(prev => prev.filter(u => u.id !== userId));
+      setBlockedUsers((prev) => prev.filter((u) => u.id !== userId));
       toast.success('User unblocked');
     } catch (error) {
       toast.error('Failed to unblock user');
@@ -89,16 +92,21 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
   };
 
   const getVisibilityLabel = (value: VisibilityOption) => {
-    return visibilityOptions.find(o => o.value === value)?.label || 'Everyone';
+    return visibilityOptions.find((o) => o.value === value)?.label || 'Everyone';
   };
 
   return (
     <>
       <Dialog open={open} onOpenChange={onClose}>
-        <DialogContent className="max-w-lg w-[95vw] sm:w-full h-[90vh] max-h-[700px] p-0 gap-0 overflow-hidden flex flex-col">
-          <DialogHeader className="p-3 sm:p-4 border-b border-border flex-shrink-0">
+        <DialogContent className="flex h-[90vh] max-h-[700px] w-[95vw] max-w-lg flex-col gap-0 overflow-hidden p-0 sm:w-full">
+          <DialogHeader className="flex-shrink-0 border-b border-border p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 sm:h-10 sm:w-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+                className="h-8 w-8 sm:h-10 sm:w-10"
+              >
                 <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
               <DialogTitle className="text-base sm:text-lg">Privacy</DialogTitle>
@@ -107,149 +115,169 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
 
           <div className="flex-1 overflow-y-auto p-4">
             {isLoading ? (
-              <div className="flex items-center justify-center h-full">
+              <div className="flex h-full items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
-            ) : settings && (
-              <div className="space-y-6">
-                {/* Who can see my personal info */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                    Who can see my personal info
-                  </h3>
-                  <div className="bg-card rounded-xl overflow-hidden border border-border">
-                    <button
-                      onClick={() => setShowVisibilityModal({ type: 'lastSeen', current: settings.lastSeenVisibility })}
-                      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Clock className="h-4 w-4 text-primary" />
+            ) : (
+              settings && (
+                <div className="space-y-6">
+                  {/* Who can see my personal info */}
+                  <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                    <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Who can see my personal info
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                      <button
+                        onClick={() =>
+                          setShowVisibilityModal({
+                            type: 'lastSeen',
+                            current: settings.lastSeenVisibility,
+                          })
+                        }
+                        className="flex w-full items-center justify-between border-b border-border p-4 transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-primary/10 p-2">
+                            <Clock className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-sm">Last Seen</span>
                         </div>
-                        <span className="text-sm">Last Seen</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-xs">{getVisibilityLabel(settings.lastSeenVisibility)}</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setShowVisibilityModal({ type: 'profilePhoto', current: settings.profilePhotoVisibility })}
-                      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors border-b border-border"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Eye className="h-4 w-4 text-primary" />
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="text-xs">
+                            {getVisibilityLabel(settings.lastSeenVisibility)}
+                          </span>
+                          <ChevronRight className="h-4 w-4" />
                         </div>
-                        <span className="text-sm">Profile Photo</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-xs">{getVisibilityLabel(settings.profilePhotoVisibility)}</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </div>
-                    </button>
+                      </button>
 
-                    <button
-                      onClick={() => setShowVisibilityModal({ type: 'about', current: settings.aboutVisibility })}
-                      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-primary/10">
-                          <Shield className="h-4 w-4 text-primary" />
+                      <button
+                        onClick={() =>
+                          setShowVisibilityModal({
+                            type: 'profilePhoto',
+                            current: settings.profilePhotoVisibility,
+                          })
+                        }
+                        className="flex w-full items-center justify-between border-b border-border p-4 transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-primary/10 p-2">
+                            <Eye className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-sm">Profile Photo</span>
                         </div>
-                        <span className="text-sm">About</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-xs">{getVisibilityLabel(settings.aboutVisibility)}</span>
-                        <ChevronRight className="h-4 w-4" />
-                      </div>
-                    </button>
-                  </div>
-                </motion.div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="text-xs">
+                            {getVisibilityLabel(settings.profilePhotoVisibility)}
+                          </span>
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                      </button>
 
-                {/* Messaging privacy */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 }}
-                >
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                    Messaging
-                  </h3>
-                  <div className="bg-card rounded-xl overflow-hidden border border-border">
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Read Receipts</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Let others see when you've read messages
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.readReceipts}
-                        onCheckedChange={(v) => handleToggle('readReceipts', v)}
-                      />
+                      <button
+                        onClick={() =>
+                          setShowVisibilityModal({
+                            type: 'about',
+                            current: settings.aboutVisibility,
+                          })
+                        }
+                        className="flex w-full items-center justify-between p-4 transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-primary/10 p-2">
+                            <Shield className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="text-sm">About</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="text-xs">
+                            {getVisibilityLabel(settings.aboutVisibility)}
+                          </span>
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                      </button>
                     </div>
+                  </motion.div>
 
-                    <div className="flex items-center justify-between p-4 border-b border-border">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Typing Indicators</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Show when you're typing a message
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.typingIndicators}
-                        onCheckedChange={(v) => handleToggle('typingIndicators', v)}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-4">
-                      <div className="flex-1">
-                        <p className="text-sm font-medium">Online Status</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Show when you're online
-                        </p>
-                      </div>
-                      <Switch
-                        checked={settings.onlineStatus}
-                        onCheckedChange={(v) => handleToggle('onlineStatus', v)}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Blocked Users */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                >
-                  <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                    Blocked Contacts
-                  </h3>
-                  <div className="bg-card rounded-xl overflow-hidden border border-border">
-                    <button
-                      onClick={() => setShowBlockedUsers(true)}
-                      className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-destructive/10">
-                          <UserX className="h-4 w-4 text-destructive" />
+                  {/* Messaging privacy */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 }}
+                  >
+                    <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Messaging
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                      <div className="flex items-center justify-between border-b border-border p-4">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Read Receipts</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            Let others see when you've read messages
+                          </p>
                         </div>
-                        <span className="text-sm">Blocked Users</span>
+                        <Switch
+                          checked={settings.readReceipts}
+                          onCheckedChange={(v) => handleToggle('readReceipts', v)}
+                        />
                       </div>
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="text-xs">{blockedUsers.length}</span>
-                        <ChevronRight className="h-4 w-4" />
+
+                      <div className="flex items-center justify-between border-b border-border p-4">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Typing Indicators</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            Show when you're typing a message
+                          </p>
+                        </div>
+                        <Switch
+                          checked={settings.typingIndicators}
+                          onCheckedChange={(v) => handleToggle('typingIndicators', v)}
+                        />
                       </div>
-                    </button>
-                  </div>
-                </motion.div>
-              </div>
+
+                      <div className="flex items-center justify-between p-4">
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">Online Status</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            Show when you're online
+                          </p>
+                        </div>
+                        <Switch
+                          checked={settings.onlineStatus}
+                          onCheckedChange={(v) => handleToggle('onlineStatus', v)}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  {/* Blocked Users */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <h3 className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Blocked Contacts
+                    </h3>
+                    <div className="overflow-hidden rounded-xl border border-border bg-card">
+                      <button
+                        onClick={() => setShowBlockedUsers(true)}
+                        className="flex w-full items-center justify-between p-4 transition-colors hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="rounded-lg bg-destructive/10 p-2">
+                            <UserX className="h-4 w-4 text-destructive" />
+                          </div>
+                          <span className="text-sm">Blocked Users</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                          <span className="text-xs">{blockedUsers.length}</span>
+                          <ChevronRight className="h-4 w-4" />
+                        </div>
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+              )
             )}
           </div>
         </DialogContent>
@@ -263,7 +291,7 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[60]"
+              className="fixed inset-0 z-[60] bg-black/60"
               onClick={() => setShowVisibilityModal({ type: null, current: 'everyone' })}
             />
             <motion.div
@@ -271,32 +299,36 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-[60] bg-background rounded-t-3xl"
+              className="fixed bottom-0 left-0 right-0 z-[60] rounded-t-3xl bg-background"
             >
-              <div className="flex justify-center pt-3 pb-2">
-                <div className="w-10 h-1 bg-muted-foreground/30 rounded-full" />
+              <div className="flex justify-center pb-2 pt-3">
+                <div className="h-1 w-10 rounded-full bg-muted-foreground/30" />
               </div>
-              <div className="px-4 pb-4 border-b border-border">
-                <h2 className="text-lg font-semibold text-center capitalize">
+              <div className="border-b border-border px-4 pb-4">
+                <h2 className="text-center text-lg font-semibold capitalize">
                   {showVisibilityModal.type?.replace(/([A-Z])/g, ' $1').trim()}
                 </h2>
               </div>
-              <div className="p-4 space-y-2 pb-safe">
+              <div className="pb-safe space-y-2 p-4">
                 {visibilityOptions.map((option) => (
                   <button
                     key={option.value}
                     onClick={() => handleVisibilityChange(showVisibilityModal.type!, option.value)}
                     className={cn(
-                      'w-full flex items-center justify-between p-4 rounded-xl transition-all',
+                      'flex w-full items-center justify-between rounded-xl p-4 transition-all',
                       showVisibilityModal.current === option.value
-                        ? 'bg-primary/10 border-2 border-primary'
-                        : 'bg-card border-2 border-transparent hover:bg-muted/50'
+                        ? 'border-2 border-primary bg-primary/10'
+                        : 'border-2 border-transparent bg-card hover:bg-muted/50'
                     )}
                   >
-                    <span className={cn(
-                      'font-medium',
-                      showVisibilityModal.current === option.value ? 'text-primary' : 'text-foreground'
-                    )}>
+                    <span
+                      className={cn(
+                        'font-medium',
+                        showVisibilityModal.current === option.value
+                          ? 'text-primary'
+                          : 'text-foreground'
+                      )}
+                    >
                       {option.label}
                     </span>
                   </button>
@@ -313,16 +345,14 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
           <DialogHeader>
             <DialogTitle>Blocked Users</DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+          <div className="max-h-[400px] space-y-2 overflow-y-auto">
             {blockedUsers.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No blocked users
-              </p>
+              <p className="py-8 text-center text-muted-foreground">No blocked users</p>
             ) : (
               blockedUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center justify-between p-3 bg-card rounded-lg"
+                  className="flex items-center justify-between rounded-lg bg-card p-3"
                 >
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
@@ -336,11 +366,7 @@ export function PrivacySettingsScreen({ open, onClose }: PrivacySettingsScreenPr
                       </p>
                     </div>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleUnblock(user.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleUnblock(user.id)}>
                     Unblock
                   </Button>
                 </div>

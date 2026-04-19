@@ -15,14 +15,21 @@ export const mockSettingsApi = {
   async updateNotifications(enabled: boolean): Promise<void> {
     localStorage.setItem(STORAGE_KEYS.SETTINGS_NOTIFS, JSON.stringify(enabled));
     try {
-      await api.put('/users/me/notifications', { pushEnabled: enabled, messageNotifications: enabled });
-    } catch { /* local-only fallback */ }
+      await api.put('/users/me/notifications', {
+        pushEnabled: enabled,
+        messageNotifications: enabled,
+      });
+    } catch {
+      /* local-only fallback */
+    }
   },
   async updateReadReceipts(enabled: boolean): Promise<void> {
     localStorage.setItem(STORAGE_KEYS.SETTINGS_RECEIPTS, JSON.stringify(enabled));
     try {
       await api.put('/users/me/privacy', { readReceipts: enabled });
-    } catch { /* local-only fallback */ }
+    } catch {
+      /* local-only fallback */
+    }
   },
   async updateFontSize(size: string): Promise<void> {
     localStorage.setItem(STORAGE_KEYS.SETTINGS_FONT, JSON.stringify(size));
