@@ -11,6 +11,7 @@ export type SocketEventType =
   | 'message:status'
   | 'message:new'
   | 'message:sent'
+  | 'message:confirmed'
   | 'message:delivered'
   | 'message:read'
   | 'message:deleted'
@@ -96,6 +97,7 @@ export interface ConnectionStatusPayload {
 class RealSocket {
   private socket: Socket | null = null;
   private _connected = false;
+  private connectionListeners: ((connected: boolean) => void)[] = [];
 
   /** Call once after login — creates the socket with cookie auth */
   connect(): void {
@@ -112,9 +114,13 @@ class RealSocket {
 
     this.socket.on('connect', () => {
       this._connected = true;
+      // BUG FIX #9: Notify connection status listeners
+      this.connectionListeners.forEach((cb) => cb(true));
     });
     this.socket.on('disconnect', () => {
       this._connected = false;
+      // BUG FIX #9: Notify connection status listeners
+      this.connectionListeners.forEach((cb) => cb(false));
     });
   }
 
@@ -123,6 +129,7 @@ class RealSocket {
     this.socket?.disconnect();
     this.socket = null;
     this._connected = false;
+    this.connectionListeners.forEach((cb) => cb(false));
   }
 
   reconnect(): void {
@@ -131,6 +138,16 @@ class RealSocket {
 
   getConnectionStatus(): boolean {
     return this.socket?.connected ?? false;
+  }
+
+  /** Subscribe to connection status changes - BUG FIX #9 */
+  onConnectionChange(callback: (connected: boolean) => void): () => void {
+    this.connectionListeners.push(callback);
+    // Immediately call with current status
+    callback(this._connected);
+    return () => {
+      this.connectionListeners = this.connectionListeners.filter((cb) => cb !== callback);
+    };
   }
 
   // ── Subscribe ─────────────────────────────────────────────────────────────

@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '@/store';
 import { initAuth, selectUser, selectIsInitialized } from '@/features/auth/authSlice';
 import { SettingsProvider } from '@/features/settings/components/SettingsProvider';
 import { socketClient } from '@/features/chat/services/socketClient';
+import webrtcService from '@/features/chat/services/webrtcService';
 
 const Index = lazy(() => import('./pages/Index'));
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
@@ -41,6 +42,8 @@ function AuthInit() {
   useEffect(() => {
     if (user) {
       socketClient.connect();
+      // BUG FIX #7: Setup WebRTC listeners after socket connection
+      webrtcService.setupWebRTCListeners();
     } else {
       socketClient.disconnect();
     }

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wifi, WifiOff, Signal, Loader2 } from 'lucide-react';
-import { socketClient, ConnectionStatusPayload } from '@/features/chat/services/socketClient';
+import { socketClient } from '@/features/chat/services/socketClient';
 import { cn } from '@/lib/utils';
 
 interface ConnectionStatusProps {
@@ -10,30 +10,22 @@ interface ConnectionStatusProps {
 
 export function ConnectionStatus({ className }: ConnectionStatusProps) {
   const [isConnected, setIsConnected] = useState(socketClient.getConnectionStatus());
-  const [latency, setLatency] = useState<number | null>(null);
   const [showStatus, setShowStatus] = useState(false);
 
+  // BUG FIX #9: Use onConnectionChange instead of non-existent connection:status event
   useEffect(() => {
-    const unsubscribe = socketClient.on<ConnectionStatusPayload>('connection:status', (event) => {
-      setIsConnected(event.payload.connected);
-      if (event.payload.latency) {
-        setLatency(Math.round(event.payload.latency));
-      }
+    const unsubscribe = socketClient.onConnectionChange((connected) => {
+      setIsConnected(connected);
 
       // Show status briefly when it changes
       setShowStatus(true);
-      setTimeout(() => setShowStatus(false), 3000);
+      const timeout = setTimeout(() => setShowStatus(false), 3000);
+
+      return () => clearTimeout(timeout);
     });
 
     return unsubscribe;
   }, []);
-
-  const getLatencyColor = () => {
-    if (!latency) return 'text-muted-foreground';
-    if (latency < 50) return 'text-primary';
-    if (latency < 150) return 'text-yellow-500';
-    return 'text-destructive';
-  };
 
   return (
     <AnimatePresence>
@@ -52,9 +44,8 @@ export function ConnectionStatus({ className }: ConnectionStatusProps) {
         >
           {isConnected ? (
             <>
-              <Signal className={cn('h-3 w-3', getLatencyColor())} />
+              <Wifi className="h-3 w-3" />
               <span>Connected</span>
-              {latency && <span className={cn('opacity-70', getLatencyColor())}>{latency}ms</span>}
             </>
           ) : (
             <>

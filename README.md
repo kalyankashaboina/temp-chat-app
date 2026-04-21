@@ -1,6 +1,26 @@
-# Relay Chat - Frontend
+# 🎨 Relay Chat - Frontend
 
-Modern real-time messaging frontend built with React, TypeScript, TailwindCSS, and Socket.IO.
+![React](https://img.shields.io/badge/React-18.3.1-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.6.2-blue)
+![Status](https://img.shields.io/badge/status-production--ready-green)
+
+Modern, real-time chat application frontend built with React 18, TypeScript, Redux Toolkit, Socket.IO, and WebRTC.
+
+---
+
+## ✨ Features
+
+- 🔄 Real-time messaging via WebSocket
+- 📹 Video/audio calling with WebRTC
+- 💬 Typing indicators & read receipts
+- 😀 Message reactions
+- 👥 Group chats
+- 📎 File uploads
+- 🌓 Dark/Light theme
+- 📱 Mobile responsive
+- ⚡ PWA support
+
+---
 
 ## 🚀 Quick Start
 
@@ -8,167 +28,116 @@ Modern real-time messaging frontend built with React, TypeScript, TailwindCSS, a
 # Install dependencies
 npm install --legacy-peer-deps
 
-# Set up environment
+# Configure environment
 cp .env.example .env
-# Edit .env with your API URL
+# Edit .env with your backend URL
 
-# Run development server
+# Start development server
 npm run dev
-
-# App starts on http://localhost:5173
 ```
+
+Access at: `http://localhost:5173`
+
+---
 
 ## 📋 Prerequisites
 
-- Node.js 20.x+
-- Backend API running
+- Node.js v18+
+- Backend API running (see backend repository)
+
+---
 
 ## ⚙️ Environment Variables
 
+Create `.env` file:
+
 ```env
 VITE_API_BASE_URL=http://localhost:4000
+VITE_APP_NAME=Relay Chat
+VITE_APP_VERSION=1.1.0
 ```
 
-## 📝 Scripts
+---
 
-- `npm run dev` - Development server
-- `npm run build` - Production build
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run format` - Format with Prettier
-- `npm run type-check` - TypeScript check
-
-## 🐳 Docker
+## 📜 Scripts
 
 ```bash
-# Build Docker image
-docker build -t relay-chat-frontend \
-  --build-arg VITE_API_BASE_URL=https://api.yoursite.com .
-
-# Run container
-docker run -p 3000:8080 relay-chat-frontend
-
-# Full stack from root
-cd .. && docker-compose up
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run preview      # Preview production build
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript validation
 ```
 
-## 🎨 Key Features
+---
 
-✅ Real-time messaging UI
-✅ WebRTC video/audio calls
-✅ Voice message recording (Web Audio API)
-✅ File upload with progress tracking
-✅ Image compression
-✅ Infinite scroll for messages
-✅ Message search
-✅ Typing indicators
-✅ Read receipts
-✅ Group chat management
-✅ Dark/light themes
-✅ PWA support
+## 🛠 Tech Stack
 
-## 🛠️ Tech Stack
+- React 18 + TypeScript
+- Redux Toolkit
+- Socket.IO Client
+- WebRTC
+- Tailwind CSS + shadcn/ui
+- Framer Motion
+- React Router
+- Axios
 
-- **React 18** with TypeScript
-- **Vite** for build tooling
-- **TailwindCSS** for styling
-- **Socket.IO Client** for real-time
-- **Shadcn/ui** for components
-- **Redux Toolkit** for state
-- **React Router** for routing
+---
 
-## 📁 Project Structure
+## 📁 Structure
 
 ```
-frontend/
-├── src/
-│   ├── components/          # Reusable UI components
-│   ├── features/            # Feature modules
-│   │   ├── auth/            # Authentication
-│   │   ├── chat/            # Chat & messaging
-│   │   │   └── services/    # WebRTC, voice, file upload
-│   │   ├── notifications/   # Notifications
-│   │   └── settings/        # User settings
-│   ├── shared/              # Shared utilities
-│   │   └── hooks/           # Custom React hooks
-│   ├── store/               # Redux store
-│   └── pages/               # Page components
-├── .github/workflows/       # CI/CD pipelines
-├── Dockerfile               # Docker configuration
-└── package.json
+src/
+├── features/         # Feature modules (auth, chat, settings)
+├── components/       # Shared UI components
+├── shared/          # Utils, hooks, constants
+├── store/           # Redux store
+├── config/          # Configuration
+└── App.tsx          # Root component
 ```
 
-## 🎯 New Services (v1.1.0)
+---
 
-### Voice Recording
-```typescript
-import voiceRecorder from '@/features/chat/services/voiceRecorder';
+## 🚀 Deployment
 
-await voiceRecorder.startRecording();
-const { blob, duration } = await voiceRecorder.stopRecording();
-```
+### Build
 
-### File Upload
-```typescript
-import { uploadFile } from '@/features/chat/services/fileUpload';
-
-const result = await uploadFile(file, {
-  onProgress: (p) => console.log(`${p.percentage}%`)
-});
-```
-
-### Infinite Scroll
-```tsx
-const { scrollRef } = useMessageScroll({
-  onLoadMore: loadOlderMessages,
-  hasMore: true
-});
-
-return <div ref={scrollRef}>{messages}</div>;
-```
-
-### WebRTC
-```typescript
-import webrtcService from '@/features/chat/services/webrtcService';
-
-await webrtcService.initiateCall(userId, 'video');
-```
-
-## 📊 CI/CD
-
-GitHub Actions configured:
-- **CI**: Lint, type-check, build
-- **CD**: Auto-deploy to Vercel on push to main
-
-## 🚢 Deployment
-
-### Vercel (Recommended)
-```bash
-npm install -g vercel
-vercel --prod
-```
-
-### Netlify
 ```bash
 npm run build
-# Deploy dist/ folder
 ```
 
-### Docker
-```bash
-docker build -t relay-chat-frontend \
-  --build-arg VITE_API_BASE_URL=https://api.yoursite.com .
-docker run -p 3000:8080 relay-chat-frontend
-```
+### Deploy to
 
-## 🔧 Build Configuration
+- **Vercel** (recommended): `vercel --prod`
+- **Netlify**: `netlify deploy --prod`
+- **Cloudflare Pages**: Connect GitHub repo
 
-The app uses Vite with:
-- React SWC for fast refresh
-- TailwindCSS for styling
-- PWA plugin for offline support
-- Path aliases (`@/` → `src/`)
+---
 
-## 📄 License
+## 🔌 Socket Events
 
-ISC
+**Listening:** presence:init, user:online, user:offline, message:new, message:sent, message:confirmed, message:delivered, message:read, typing:start, typing:stop, call:incoming, call:accepted, webrtc:offer, etc.
+
+**Emitting:** message:send, typing:start, typing:stop, call:initiate, call:accept, webrtc:offer, etc.
+
+See full list in `/src/config/index.ts`
+
+---
+
+## 🐛 Troubleshooting
+
+**Install fails:** Use `npm install --legacy-peer-deps`
+
+**WebSocket fails:** Check `VITE_API_BASE_URL` and backend CORS
+
+**Build fails:** Run `npm run type-check` to see errors
+
+---
+
+## 📝 License
+
+MIT License
+
+---
+
+**Built with ❤️ using React, TypeScript, and WebRTC**
