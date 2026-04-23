@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useChat } from '@/features/chat/useChat';
 import { Conversation } from '@/features/chat/types';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,6 @@ import { CreateGroupModal } from './CreateGroupModal';
 import { ConversationActions, MutedBadge, PinnedBadge } from './ConversationActions';
 import { format, isToday, isYesterday } from 'date-fns';
 import { motion } from 'framer-motion';
-import { socketClient, TypingPayload } from '@/features/chat/services/socketClient';
 
 import { getInitials, getAvatarColor } from '@/shared/lib/chatUtils';
 
@@ -182,44 +181,11 @@ export function ConversationList() {
   } = useChat();
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateGroup, setShowCreateGroup] = useState(false);
-  const [typingConversations, setTypingConversations] = useState<Map<string, string[]>>(new Map());
 
-  // Listen for typing events from all conversations
-  useEffect(() => {
-    const unsubStart = socketClient.on<TypingPayload>('typing:start', (event) => {
-      setTypingConversations((prev) => {
-        const newMap = new Map(prev);
-        const current = newMap.get(event.payload.conversationId) || [];
-        if (!current.includes(event.payload.userName)) {
-          newMap.set(event.payload.conversationId, [...current, event.payload.userName]);
-        }
-        return newMap;
-      });
-    });
-
-    const unsubStop = socketClient.on<TypingPayload>('typing:stop', (event) => {
-      setTypingConversations((prev) => {
-        const newMap = new Map(prev);
-        const current = newMap.get(event.payload.conversationId) || [];
-        newMap.set(
-          event.payload.conversationId,
-          current.filter((name) => name !== event.payload.userName)
-        );
-        return newMap;
-      });
-    });
-
-    return () => {
-      unsubStart();
-      unsubStop();
-    };
-  }, []);
-
+  // BUG FIX #8: Removed duplicate typing listeners - now using Redux state
   const isConversationTyping = (convId: string) => {
-    const socketTyping = typingConversations.get(convId);
-    if (socketTyping && socketTyping.length > 0) return true;
-    // Also check active conversation typing from context
-    return activeConversation?.id === convId && isTyping;
+    const typing = typingUsers[convId];
+    return typing && typing.length > 0;
   };
 
   // Filter out archived conversations and apply search

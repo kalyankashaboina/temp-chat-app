@@ -198,6 +198,25 @@ export function useChat() {
           })
         );
       }),
+      
+      // BUG FIX #4: Listen for message:confirmed from queue processor (real MongoDB ID)
+      socketClient.on('message:confirmed', (e) => {
+        const p = e.payload as {
+          tempId: string;
+          realId: string;
+          conversationId: string;
+          createdAt: string;
+        };
+        dispatch(
+          confirmMessage({
+            conversationId: p.conversationId,
+            tempId: p.tempId,
+            realId: p.realId,
+            createdAt: p.createdAt,
+          })
+        );
+      }),
+      
       socketClient.on('message:delivered', (e) => {
         const p = e.payload as { messageId: string; conversationId: string };
         if (p.conversationId)
@@ -222,12 +241,17 @@ export function useChat() {
         );
       }),
       socketClient.on('message:failed', (e) => {
-        const p = e.payload as { tempId: string };
-        const convId = activeConvIdRef.current;
-        if (convId && p.tempId)
+        // BUG FIX #3: Use conversationId from payload, not activeConvIdRef
+        const p = e.payload as { tempId: string; conversationId?: string; reason?: string };
+        const convId = p.conversationId || activeConvIdRef.current;
+        if (convId && p.tempId) {
           dispatch(
             updateMessageStatus({ conversationId: convId, messageId: p.tempId, status: 'failed' })
           );
+          if (p.reason) {
+            console.error(`Message failed: ${p.reason}`);
+          }
+        }
       }),
       socketClient.on('message:deleted', (e) => {
         const p = e.payload as { messageId: string; conversationId: string };
@@ -272,24 +296,47 @@ export function useChat() {
         dispatch(applyRemoteReaction({ ...p, added: false }));
       }),
 
-      // Typing
+      // Typing - BUG FIX #8: Use per-conversation typing state
       socketClient.on('typing:start', (e) => {
         const p = e.payload as { conversationId: string; userName: string };
-        if (activeConvIdRef.current === p.conversationId) {
-          dispatch(setTypingAction(true));
-          dispatch(addTypingUser(p.userName));
-        }
+        dispatch(addTypingUser({ conversationId: p.conversationId, username: p.userName }));
       }),
       socketClient.on('typing:stop', (e) => {
         const p = e.payload as { conversationId: string; userName: string };
-        if (activeConvIdRef.current === p.conversationId) {
-          dispatch(removeTypingUser(p.userName));
-        }
+        dispatch(removeTypingUser({ conversationId: p.conversationId, username: p.userName }));
       }),
 
       // New conversation pushed from server
       socketClient.on('conversation:new', (e) => {
         dispatch(upsertConversation(e.payload as Conversation));
+      }),
+
+      // BUG FIX #6: Call event listeners
+      socketClient.on('call:incoming', (e) => {
+        const p = e.payload as { fromUserId: string; callType: 'audio' | 'video'; offer: RTCSessionDescriptionInit };
+        console.log('Incoming call from:', p.fromUserId, p.callType);
+        // TODO: Show incoming call UI, integrate with CallOverlay
+        // For now, just log it - UI integration needed in CallOverlay component
+      }),
+      socketClient.on('call:accepted', (e) => {
+        const p = e.payload as { userId: string };
+        console.log('Call accepted by:', p.userId);
+        // TODO: Transition to connected state in CallOverlay
+      }),
+      socketClient.on('call:rejected', (e) => {
+        const p = e.payload as { userId: string; reason?: string };
+        console.log('Call rejected by:', p.userId, p.reason);
+        // TODO: Show toast and cleanup in CallOverlay
+      }),
+      socketClient.on('call:ended', (e) => {
+        const p = e.payload as { userId: string };
+        console.log('Call ended by:', p.userId);
+        // TODO: Cleanup call state in CallOverlay
+      }),
+      socketClient.on('call:busy', (e) => {
+        const p = e.payload as { userId: string };
+        console.log('User is busy:', p.userId);
+        // TODO: Show "user is busy" toast
       }),
     ];
     return () => subs.forEach((unsub) => unsub());
@@ -357,7 +404,10 @@ export function useChat() {
         }, 5000);
       } else {
         socketClient.typingStop(activeConversationId);
-        dispatch(setTypingUsers([]));
+        // Clear typing users for this conversation
+        if (activeConversationId) {
+          dispatch(setTypingUsers({ conversationId: activeConversationId, users: [] }));
+        }
       }
     },
     [activeConversationId, dispatch]

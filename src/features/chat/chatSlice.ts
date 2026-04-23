@@ -30,7 +30,7 @@ interface ChatState {
   queue: QueuedItem[];
   language: Language;
   isTyping: boolean;
-  typingUsers: string[];
+  typingUsers: Record<string, string[]>; // conversationId -> array of typing usernames
   showConversationList: boolean;
   callHistory: CallRecord[];
   allUsers: User[];
@@ -53,7 +53,7 @@ const initialState: ChatState = {
   queue: [],
   language: 'en',
   isTyping: false,
-  typingUsers: [],
+  typingUsers: {}, // conversationId -> usernames
   showConversationList: true,
   callHistory: [],
   allUsers: [],
@@ -173,6 +173,23 @@ export const sendMessageAsync = createAsyncThunk(
       replyTo: state.replyingTo,
     });
 
+    // BUG FIX #11: Timeout for pending messages
+    setTimeout(() => {
+      const currentState = (getState() as { chat: ChatState }).chat;
+      const msgs = currentState.messagesMap[convId] || [];
+      const msg = msgs.find((m) => m.id === tempId);
+      // If message still pending after 10 seconds, mark as failed
+      if (msg && msg.status === 'pending') {
+        dispatch(
+          updateMessageStatus({
+            conversationId: convId,
+            messageId: tempId,
+            status: 'failed',
+          })
+        );
+      }
+    }, 10000); // 10 second timeout
+
     // Upload files if any (update progress per file)
     for (const att of attachments.filter((a) => a.uploadStatus === 'pending')) {
       const rawFile = (files || []).find((f) => f.name === att.name);
@@ -255,12 +272,33 @@ export const retryMessageAsync = createAsyncThunk(
   'chat/retryMessageAsync',
   async (messageId: string, { getState, dispatch }) => {
     const state = (getState() as { chat: ChatState }).chat;
-    const convId = state.activeConversationId;
-    if (!convId) return;
-    const msg = (state.messagesMap[convId] || []).find((m) => m.id === messageId);
-    if (!msg || !state.isOnline) return;
-    dispatch(resetMessageForRetry({ conversationId: convId, messageId }));
-    socketClient.sendMessage({ conversationId: convId, content: msg.content, tempId: messageId });
+    
+    // BUG FIX #12: Search all conversations, not just active one
+    let foundConvId = state.activeConversationId;
+    let msg = state.activeConversationId
+      ? (state.messagesMap[state.activeConversationId] || []).find((m) => m.id === messageId)
+      : undefined;
+
+    if (!msg) {
+      // Search all conversations
+      for (const [cid, msgs] of Object.entries(state.messagesMap)) {
+        const found = msgs.find((m) => m.id === messageId);
+        if (found) {
+          msg = found;
+          foundConvId = cid;
+          break;
+        }
+      }
+    }
+
+    if (!msg || !foundConvId || !state.isOnline) return;
+
+    dispatch(resetMessageForRetry({ conversationId: foundConvId, messageId }));
+    socketClient.sendMessage({
+      conversationId: foundConvId,
+      content: msg.content,
+      tempId: messageId,
+    });
   }
 );
 
@@ -305,15 +343,31 @@ const chatSlice = createSlice({
     setTyping: (s, a: PayloadAction<boolean>) => {
       s.isTyping = a.payload;
     },
-    setTypingUsers: (s, a: PayloadAction<string[]>) => {
-      s.typingUsers = a.payload;
+    setTypingUsers: (s, a: PayloadAction<{ conversationId: string; users: string[] }>) => {
+      s.typingUsers[a.payload.conversationId] = a.payload.users;
     },
-    addTypingUser: (s, a: PayloadAction<string>) => {
-      if (!s.typingUsers.includes(a.payload)) s.typingUsers.push(a.payload);
+    addTypingUser: (s, a: PayloadAction<{ conversationId: string; username: string }>) => {
+      const { conversationId, username } = a.payload;
+      if (!s.typingUsers[conversationId]) {
+        s.typingUsers[conversationId] = [];
+      }
+      if (!s.typingUsers[conversationId].includes(username)) {
+        s.typingUsers[conversationId].push(username);
+      }
+      // Set isTyping if this is the active conversation
+      if (s.activeConversationId === conversationId) {
+        s.isTyping = true;
+      }
     },
-    removeTypingUser: (s, a: PayloadAction<string>) => {
-      s.typingUsers = s.typingUsers.filter((n) => n !== a.payload);
-      if (!s.typingUsers.length) s.isTyping = false;
+    removeTypingUser: (s, a: PayloadAction<{ conversationId: string; username: string }>) => {
+      const { conversationId, username } = a.payload;
+      if (s.typingUsers[conversationId]) {
+        s.typingUsers[conversationId] = s.typingUsers[conversationId].filter((n) => n !== username);
+        // Clear isTyping if active conversation has no typing users
+        if (s.activeConversationId === conversationId && s.typingUsers[conversationId].length === 0) {
+          s.isTyping = false;
+        }
+      }
     },
     setShowConversationList: (s, a: PayloadAction<boolean>) => {
       s.showConversationList = a.payload;
@@ -333,7 +387,7 @@ const chatSlice = createSlice({
       s.showConversationList = false;
       s.replyingTo = null;
       s.isTyping = false;
-      s.typingUsers = [];
+      // Don't clear all typing users - they're stored per conversation now
       const conv = s.conversations.find((c) => c.id === a.payload);
       if (conv) conv.unreadCount = 0;
       if (s.hasMoreMessages[a.payload] === undefined) s.hasMoreMessages[a.payload] = true;
@@ -355,11 +409,13 @@ const chatSlice = createSlice({
       // Avoid duplicates (tempId → real id swap handled below)
       if (s.messagesMap[conversationId].some((m) => m.id === message.id)) return;
       s.messagesMap[conversationId].push(message);
-      if (s.activeConversationId !== conversationId) {
-        const conv = s.conversations.find((c) => c.id === conversationId);
-        if (conv) {
-          conv.unreadCount += 1;
-          conv.lastMessage = message;
+      
+      // BUG FIX #10: Always update lastMessage, only skip unreadCount when active
+      const conv = s.conversations.find((c) => c.id === conversationId);
+      if (conv) {
+        conv.lastMessage = message; // Always update preview
+        if (s.activeConversationId !== conversationId) {
+          conv.unreadCount += 1; // Only increment if not viewing
         }
       }
     },
@@ -737,7 +793,17 @@ const chatSlice = createSlice({
         s.isLoadingMessages = false;
         if (!a.payload) return;
         const { conversationId, messages, hasMore, nextCursor } = a.payload;
-        s.messagesMap[conversationId] = messages;
+        
+        // BUG FIX #5: Merge with existing socket-delivered messages
+        const existing = s.messagesMap[conversationId] || [];
+        const httpIds = new Set(messages.map((m) => m.id));
+        // Keep messages that exist in store but not in HTTP result (socket-delivered)
+        const socketOnly = existing.filter((m) => !httpIds.has(m.id));
+        // Merge and sort by timestamp
+        s.messagesMap[conversationId] = [...messages, ...socketOnly].sort(
+          (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        );
+        
         s.hasMoreMessages[conversationId] = hasMore;
         s.paginationCursors[conversationId] = nextCursor;
       })

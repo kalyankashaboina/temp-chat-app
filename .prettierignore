@@ -10,11 +10,3 @@ yarn.lock
 .env
 .env.local
 .env.*.local
-
-# Ignore coverage
-coverage/
-
-# Ignore public assets
-public/**/*.svg
-public/**/*.png
-public/**/*.jpg

@@ -337,24 +337,24 @@ export function useCall(translate: (key: string) => string) {
         localStream: stream,
       });
 
-      // Simulate ringing
-      setTimeout(() => {
-        setCallState((prev) => ({ ...prev, status: 'connecting' }));
-      }, 1500);
-
-      // Simulate connection after delay
-      setTimeout(
-        () => {
-          // 90% success rate
-          if (Math.random() > 0.1) {
-            setCallState((prev) => ({ ...prev, status: 'connected' }));
-          } else {
-            toast.error('Call failed. Please try again.');
-            endCallInternal();
-          }
-        },
-        3000 + Math.random() * 1000
-      );
+      // BUG FIX #6: Use real socket signaling instead of setTimeout simulation
+      try {
+        // Import webrtcService at the top of the file
+        const { default: webrtcService } = await import('@/features/chat/services/webrtcService');
+        
+        // Initiate real WebRTC call
+        await webrtcService.initiateCall(remoteUser.id, type);
+        
+        // Also emit via socket for call signaling
+        socketClient.initiateCall(remoteUser.id, type);
+        
+        // State transitions will happen via socket events (call:accepted, call:rejected, etc.)
+        // These are handled in useChat.ts
+      } catch (error) {
+        console.error('Failed to initiate call:', error);
+        toast.error('Failed to initiate call. Please try again.');
+        endCallInternal();
+      }
     },
     [translate]
   );

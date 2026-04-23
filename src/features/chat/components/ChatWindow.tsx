@@ -207,9 +207,12 @@ export function ChatWindow({ onOpenMediaGallery }: ChatWindowProps) {
     ? activeConversation.users?.some((u) => u.isOnline)
     : activeConversation.user?.isOnline;
   const memberCount = isGroup ? activeConversation.users?.length : undefined;
+  
+  // Get typing users for this specific conversation
+  const activeTypingUsers = activeConversation?.id ? (typingUsers[activeConversation.id] || []) : [];
   const typingNames =
-    isGroup && typingUsers.length > 0
-      ? typingUsers
+    isGroup && activeTypingUsers.length > 0
+      ? activeTypingUsers
       : isTyping && activeConversation.user
         ? [activeConversation.user.name]
         : [];
