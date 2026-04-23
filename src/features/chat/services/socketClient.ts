@@ -3,6 +3,7 @@
 
 import { io, type Socket } from 'socket.io-client';
 import { SOCKET_URL, SOCKET_EVENTS } from '@/config';
+import { eventLogger } from '@/shared/services/eventLogger';
 
 // ── Re-export event types so existing useSocket.ts imports still work ────────
 
@@ -114,11 +115,13 @@ class RealSocket {
 
     this.socket.on('connect', () => {
       this._connected = true;
+      eventLogger.log('SOCKET_CONNECT', { payload: { url: SOCKET_URL } });
       // BUG FIX #9: Notify connection status listeners
       this.connectionListeners.forEach((cb) => cb(true));
     });
     this.socket.on('disconnect', () => {
       this._connected = false;
+      eventLogger.log('SOCKET_DISCONNECT');
       // BUG FIX #9: Notify connection status listeners
       this.connectionListeners.forEach((cb) => cb(false));
     });
@@ -173,50 +176,66 @@ class RealSocket {
     tempId: string;
     replyTo?: unknown;
   }): void {
+    eventLogger.log('MESSAGE_SEND', {
+      tempId: payload.tempId,
+      conversationId: payload.conversationId,
+      payload: { content: payload.content },
+    });
     this.socket?.emit(SOCKET_EVENTS.MSG_SEND, payload);
   }
 
   deleteMessage(messageId: string): void {
+    eventLogger.log('MESSAGE_DELETED', { messageId });
     this.socket?.emit(SOCKET_EVENTS.MSG_DELETE, { messageId });
   }
 
   editMessage(messageId: string, content: string): void {
+    eventLogger.log('MESSAGE_EDITED', { messageId, payload: { content } });
     this.socket?.emit(SOCKET_EVENTS.MSG_EDIT, { messageId, content });
   }
 
   react(messageId: string, emoji: string, conversationId: string): void {
+    eventLogger.log('REACTION_ADDED', { messageId, conversationId, payload: { emoji } });
     this.socket?.emit(SOCKET_EVENTS.MSG_REACT, { messageId, emoji, conversationId });
   }
 
   unreact(messageId: string, emoji: string, conversationId: string): void {
+    eventLogger.log('REACTION_REMOVED', { messageId, conversationId, payload: { emoji } });
     this.socket?.emit(SOCKET_EVENTS.MSG_UNREACT, { messageId, emoji, conversationId });
   }
 
   typingStart(conversationId: string): void {
+    eventLogger.log('TYPING_START', { conversationId });
     this.socket?.emit(SOCKET_EVENTS.TYPING_START, { conversationId });
   }
 
   typingStop(conversationId: string): void {
+    eventLogger.log('TYPING_STOP', { conversationId });
     this.socket?.emit(SOCKET_EVENTS.TYPING_STOP, { conversationId });
   }
 
   markRead(conversationId: string): void {
+    eventLogger.log('CONNECTION_STATUS_CHANGE', { conversationId, payload: { action: 'mark_read' } });
     this.socket?.emit(SOCKET_EVENTS.CONV_READ, { conversationId });
   }
 
   initiateCall(toUserId: string, type: 'audio' | 'video'): void {
+    eventLogger.log('CALL_INCOMING', { userId: toUserId, payload: { type } });
     this.socket?.emit(SOCKET_EVENTS.CALL_INITIATE, { toUserId, type });
   }
 
   acceptCall(fromUserId: string): void {
+    eventLogger.log('CALL_ACCEPTED', { userId: fromUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_ACCEPT, { fromUserId });
   }
 
   rejectCall(fromUserId: string): void {
+    eventLogger.log('CALL_REJECTED', { userId: fromUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_REJECT, { fromUserId });
   }
 
   endCall(toUserId: string): void {
+    eventLogger.log('CALL_ENDED', { userId: toUserId });
     this.socket?.emit(SOCKET_EVENTS.CALL_END, { toUserId });
   }
 

@@ -18,6 +18,7 @@ import {
 } from '@/features/chat/services/messageService';
 import { chatApi } from '@/features/chat/services/chatApi';
 import { socketClient } from '@/features/chat/services/socketClient';
+import { eventLogger } from '@/shared/services/eventLogger';
 import { t } from '@/shared/lib/i18n';
 
 // ── State ─────────────────────────────────────────────────────────────────────
@@ -131,25 +132,38 @@ export const sendMessageAsync = createAsyncThunk(
       };
     });
 
-    const optimistic: Message = {
-      id: tempId,
-      content,
-      senderId: state.currentUserId,
-      timestamp: new Date(),
-      status: 'pending',
-      attachments,
-      isOwn: true,
-      reactions: [],
-      isVanish,
-      vanishTimer: isVanish ? vanishTimer : undefined,
-      vanishAt: isVanish ? new Date(Date.now() + vanishTimer * 1000) : undefined,
-      replyTo: state.replyingTo || undefined,
-    };
+  const optimistic: Message = {
+  id: tempId,
+  content,
+  senderId: state.currentUserId,
+  timestamp: new Date().toISOString(),
+  status: 'pending',
+  attachments,
+  isOwn: true,
+  reactions: [],
+  isVanish,
+  vanishTimer: isVanish ? vanishTimer : undefined,
+  vanishAt: isVanish
+    ? new Date(Date.now() + vanishTimer * 1000).toISOString()
+    : undefined,
+  replyTo: state.replyingTo || undefined,
+};
+
+    eventLogger.log('MESSAGE_SEND', {
+      tempId,
+      conversationId: convId,
+      payload: { content, hasAttachments: attachments.length > 0, isVanish },
+    });
 
     dispatch(addOwnMessage({ conversationId: convId, message: optimistic }));
     dispatch(setReplyingTo(null));
 
     if (!state.isOnline) {
+      eventLogger.log('OFFLINE_QUEUE_PROCESS', {
+        tempId,
+        conversationId: convId,
+        payload: { reason: 'offline' },
+      });
       dispatch(
         enqueueItem({
           id: `q-${tempId}`,
@@ -158,7 +172,7 @@ export const sendMessageAsync = createAsyncThunk(
           messageId: convId,
           retryCount: 0,
           maxRetries: 3,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
           status: 'pending',
         })
       );
@@ -180,6 +194,11 @@ export const sendMessageAsync = createAsyncThunk(
       const msg = msgs.find((m) => m.id === tempId);
       // If message still pending after 10 seconds, mark as failed
       if (msg && msg.status === 'pending') {
+        eventLogger.log('MESSAGE_FAILED', {
+          tempId,
+          conversationId: convId,
+          error: 'Message timeout - no confirmation after 10s',
+        });
         dispatch(
           updateMessageStatus({
             conversationId: convId,
@@ -195,6 +214,11 @@ export const sendMessageAsync = createAsyncThunk(
       const rawFile = (files || []).find((f) => f.name === att.name);
       if (!rawFile) continue;
       try {
+        eventLogger.log('FILE_UPLOAD_START', {
+          messageId: tempId,
+          conversationId: convId,
+          payload: { fileName: att.name, fileSize: att.size },
+        });
         dispatch(
           updateAttachmentProgress({
             conversationId: convId,
@@ -204,6 +228,11 @@ export const sendMessageAsync = createAsyncThunk(
           })
         );
         const uploaded = await chatApi.uploadFile(rawFile, (pct) => {
+          eventLogger.log('FILE_UPLOAD_PROGRESS', {
+            messageId: tempId,
+            conversationId: convId,
+            payload: { fileName: att.name, progress: pct },
+          });
           dispatch(
             updateAttachmentProgress({
               conversationId: convId,
@@ -212,6 +241,11 @@ export const sendMessageAsync = createAsyncThunk(
               progress: pct,
             })
           );
+        });
+        eventLogger.log('FILE_UPLOAD_COMPLETE', {
+          messageId: tempId,
+          conversationId: convId,
+          payload: { fileName: att.name, url: uploaded },
         });
         dispatch(
           updateAttachmentStatus({
@@ -223,7 +257,13 @@ export const sendMessageAsync = createAsyncThunk(
           })
         );
         // TODO: include uploaded URL in message via socket
-      } catch {
+      } catch (error) {
+        eventLogger.log('FILE_UPLOAD_FAILED', {
+          messageId: tempId,
+          conversationId: convId,
+          error: String(error),
+          payload: { fileName: att.name },
+        });
         dispatch(
           updateAttachmentStatus({
             conversationId: convId,
@@ -291,7 +331,20 @@ export const retryMessageAsync = createAsyncThunk(
       }
     }
 
-    if (!msg || !foundConvId || !state.isOnline) return;
+    if (!msg || !foundConvId || !state.isOnline) {
+      eventLogger.log('OFFLINE_QUEUE_RETRY', {
+        messageId,
+        conversationId: foundConvId,
+        error: !state.isOnline ? 'offline' : 'message_not_found',
+      });
+      return;
+    }
+
+    eventLogger.log('OFFLINE_QUEUE_RETRY', {
+      messageId,
+      conversationId: foundConvId,
+      payload: { content: msg.content },
+    });
 
     dispatch(resetMessageForRetry({ conversationId: foundConvId, messageId }));
     socketClient.sendMessage({
@@ -396,6 +449,11 @@ const chatSlice = createSlice({
     },
 
     addOwnMessage: (s, a: PayloadAction<{ conversationId: string; message: Message }>) => {
+      console.log('[REDUCER] addOwnMessage', {
+  conv: a.payload.conversationId,
+  id: a.payload.message.id,
+  status: a.payload.message.status,
+});
       const { conversationId, message } = a.payload;
       if (!s.messagesMap[conversationId]) s.messagesMap[conversationId] = [];
       s.messagesMap[conversationId].push(message);
@@ -404,6 +462,10 @@ const chatSlice = createSlice({
     },
 
     addIncomingMessage: (s, a: PayloadAction<{ conversationId: string; message: Message }>) => {
+      console.log('[REDUCER] addIncomingMessage', {
+  conv: a.payload.conversationId,
+  id: a.payload.message.id,
+});
       const { conversationId, message } = a.payload;
       if (!s.messagesMap[conversationId]) s.messagesMap[conversationId] = [];
       // Avoid duplicates (tempId → real id swap handled below)
@@ -421,30 +483,75 @@ const chatSlice = createSlice({
     },
 
     // When server confirms a message sent (tempId → real id)
-    confirmMessage: (
-      s,
-      a: PayloadAction<{
-        conversationId: string;
-        tempId: string;
-        realId: string;
-        createdAt: string;
-      }>
-    ) => {
-      const { conversationId, tempId, realId, createdAt } = a.payload;
-      const msgs = s.messagesMap[conversationId];
-      if (!msgs) return;
-      const msg = msgs.find((m) => m.id === tempId);
-      if (msg) {
-        msg.id = realId;
-        msg.status = 'sent';
-        msg.timestamp = new Date(createdAt);
-      }
-    },
+confirmMessage: (
+  s,
+  a: PayloadAction<{
+    conversationId: string;
+    tempId: string;
+    realId: string;
+    createdAt: string;
+  }>
+) => {
+  
+  const { conversationId, tempId, realId, createdAt } = a.payload;
+  const msgs = s.messagesMap[conversationId];
+  if (!msgs) return;
 
+  const tempIndex = msgs.findIndex((m) => m.id === tempId);
+  const realIndex = msgs.findIndex((m) => m.id === realId);
+
+  // ✅ CASE 1: temp exists → replace
+  if (tempIndex !== -1) {
+    const msg = msgs[tempIndex];
+
+    msg.id = realId;
+
+    if (msg.status === 'pending') {
+      msg.status = 'sent';
+    }
+
+    msg.timestamp = createdAt; // or new Date(createdAt)
+console.log('[REDUCER] confirm START', {
+  conv: conversationId,
+  tempId,
+  realId,
+});
+    // remove duplicate real message if exists
+    if (realIndex !== -1 && realIndex !== tempIndex) {
+      msgs.splice(realIndex, 1);
+    }
+
+    // ✅ update conversation preview
+    const conv = s.conversations.find(c => c.id === conversationId);
+    if (conv) conv.lastMessage = msg;
+
+    return;
+  }
+
+  // ✅ CASE 2: temp missing but real exists
+  if (realIndex !== -1) {
+    const msg = msgs[realIndex];
+
+    if (msg.status === 'pending') {
+      msg.status = 'sent';
+    }
+ msg.timestamp = createdAt;
+    return;
+  }
+
+  // ❌ DO NOT inject fake message
+  console.warn('confirmMessage fallback hit', a.payload);
+}
+,
     updateMessageStatus: (
       s,
       a: PayloadAction<{ conversationId: string; messageId: string; status: Message['status'] }>
     ) => {
+      console.log('[REDUCER] updateMessageStatus', {
+  conv: a.payload.conversationId,
+  id: a.payload.messageId,
+  status: a.payload.status,
+});
       const msgs = s.messagesMap[a.payload.conversationId];
       if (msgs) {
         const m = msgs.find((m) => m.id === a.payload.messageId);
@@ -473,7 +580,7 @@ const chatSlice = createSlice({
       if (m) {
         m.content = a.payload.newContent;
         m.isEdited = true;
-        m.editedAt = new Date();
+        m.editedAt = new Date().toISOString();
       }
       socketClient.editMessage(a.payload.messageId, a.payload.newContent);
     },
@@ -515,7 +622,7 @@ const chatSlice = createSlice({
         if (m) {
           m.content = a.payload.content;
           m.isEdited = true;
-          m.editedAt = new Date(a.payload.editedAt);
+          m.editedAt = a.payload.editedAt;
         }
       }
     },
@@ -530,7 +637,7 @@ const chatSlice = createSlice({
           emoji: a.payload.emoji,
           userId: s.currentUserId,
           userName: 'You',
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
         });
       }
       socketClient.react(a.payload.messageId, a.payload.emoji, convId);
@@ -563,11 +670,12 @@ const chatSlice = createSlice({
       if (!m.reactions) m.reactions = [];
       if (a.payload.added) {
         if (!m.reactions.some((r) => r.emoji === a.payload.emoji && r.userId === a.payload.userId))
-          m.reactions.push({
-            emoji: a.payload.emoji,
-            userId: a.payload.userId,
-            userName: a.payload.username,
-          });
+       m.reactions.push({
+  emoji: a.payload.emoji,
+  userId: a.payload.userId,
+  userName: a.payload.username,
+  timestamp: new Date().toISOString(),
+});
       } else {
         m.reactions = m.reactions.filter(
           (r) => !(r.emoji === a.payload.emoji && r.userId === a.payload.userId)
