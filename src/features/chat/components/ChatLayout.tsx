@@ -1,17 +1,46 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useChat } from '@/features/chat/useChat';
-import { ConversationList } from './ConversationList';
-import { ChatWindow } from './ChatWindow';
-import { CallHistory } from './CallHistory';
-import { UsersList } from './UsersList';
+
+const ConversationList = lazy(() =>
+  import('./ConversationList').then((m) => ({ default: m.ConversationList }))
+);
+
+const ChatWindow = lazy(() =>
+  import('./ChatWindow').then((m) => ({ default: m.ChatWindow }))
+);
+
+const CallHistory = lazy(() =>
+  import('./CallHistory').then((m) => ({ default: m.CallHistory }))
+);
+
+const UsersList = lazy(() =>
+  import('./UsersList').then((m) => ({ default: m.UsersList }))
+);
+
+const AIChat = lazy(() =>
+  import('./AIChat').then((m) => ({ default: m.AIChat }))
+);
+
+const ProfileScreen = lazy(() =>
+  import('./ProfileScreen').then((m) => ({ default: m.ProfileScreen }))
+);
+
+const MediaGallery = lazy(() =>
+  import('./MediaGallery').then((m) => ({ default: m.MediaGallery }))
+);
+
+const InstallPrompt = lazy(() =>
+  import('./InstallPrompt').then((m) => ({ default: m.InstallPrompt }))
+);
+
+const UpdatePrompt = lazy(() =>
+  import('./UpdatePrompt').then((m) => ({ default: m.UpdatePrompt }))
+);
+
 import { NotificationPrompt } from './NotificationPrompt';
-import { AIChat } from './AIChat';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
-import { ProfileScreen } from './ProfileScreen';
-import { MediaGallery } from './MediaGallery';
-import { InstallPrompt } from './InstallPrompt';
-import { UpdatePrompt } from './UpdatePrompt';
 import { ConnectionStatus } from './ConnectionStatus';
+
 import { useSwipeGesture } from '@/shared/hooks/useSwipeGesture';
 import { cn } from '@/lib/utils';
 import { MessageSquare, Phone, UserPlus, Settings } from 'lucide-react';
@@ -174,7 +203,9 @@ function ChatContent() {
                   exit={{ opacity: 0, x: 20 }}
                   className="h-full"
                 >
-                  <ConversationList />
+                <Suspense fallback={null}>
+  <ConversationList />
+</Suspense>
                 </motion.div>
               )}
               {activeTab === 'calls' && (
