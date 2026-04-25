@@ -10,6 +10,7 @@ import { initAuth, selectUser, selectIsInitialized } from '@/features/auth/authS
 import { SettingsProvider } from '@/features/settings/components/SettingsProvider';
 import { socketClient } from '@/features/chat/services/socketClient';
 import webrtcService from '@/features/chat/services/webrtcService';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 const Index = lazy(() => import('./pages/Index'));
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
@@ -73,43 +74,45 @@ function AppRoutes() {
   return (
     <>
       <AuthInit />
-      <Suspense fallback={<LoadingScreen />}>
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Index />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/login"
-            element={
-              <AuthRoute>
-                <LoginPage />
-              </AuthRoute>
-            }
-          />
-          <Route
-            path="/register"
-            element={
-              <AuthRoute>
-                <RegisterPage />
-              </AuthRoute>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <AuthRoute>
-                <ForgotPasswordPage />
-              </AuthRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <ErrorBoundary>
+        <Suspense fallback={<LoadingScreen />}>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Index />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/login"
+              element={
+                <AuthRoute>
+                  <LoginPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthRoute>
+                  <RegisterPage />
+                </AuthRoute>
+              }
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <AuthRoute>
+                  <ForgotPasswordPage />
+                </AuthRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
     </>
   );
 }

@@ -132,22 +132,20 @@ export const sendMessageAsync = createAsyncThunk(
       };
     });
 
-  const optimistic: Message = {
-  id: tempId,
-  content,
-  senderId: state.currentUserId,
-  timestamp: new Date().toISOString(),
-  status: 'pending',
-  attachments,
-  isOwn: true,
-  reactions: [],
-  isVanish,
-  vanishTimer: isVanish ? vanishTimer : undefined,
-  vanishAt: isVanish
-    ? new Date(Date.now() + vanishTimer * 1000).toISOString()
-    : undefined,
-  replyTo: state.replyingTo || undefined,
-};
+    const optimistic: Message = {
+      id: tempId,
+      content,
+      senderId: state.currentUserId,
+      timestamp: new Date().toISOString(),
+      status: 'pending',
+      attachments,
+      isOwn: true,
+      reactions: [],
+      isVanish,
+      vanishTimer: isVanish ? vanishTimer : undefined,
+      vanishAt: isVanish ? new Date(Date.now() + vanishTimer * 1000).toISOString() : undefined,
+      replyTo: state.replyingTo || undefined,
+    };
 
     eventLogger.log('MESSAGE_SEND', {
       tempId,
@@ -312,7 +310,7 @@ export const retryMessageAsync = createAsyncThunk(
   'chat/retryMessageAsync',
   async (messageId: string, { getState, dispatch }) => {
     const state = (getState() as { chat: ChatState }).chat;
-    
+
     // BUG FIX #12: Search all conversations, not just active one
     let foundConvId = state.activeConversationId;
     let msg = state.activeConversationId
@@ -417,7 +415,10 @@ const chatSlice = createSlice({
       if (s.typingUsers[conversationId]) {
         s.typingUsers[conversationId] = s.typingUsers[conversationId].filter((n) => n !== username);
         // Clear isTyping if active conversation has no typing users
-        if (s.activeConversationId === conversationId && s.typingUsers[conversationId].length === 0) {
+        if (
+          s.activeConversationId === conversationId &&
+          s.typingUsers[conversationId].length === 0
+        ) {
           s.isTyping = false;
         }
       }
@@ -450,10 +451,10 @@ const chatSlice = createSlice({
 
     addOwnMessage: (s, a: PayloadAction<{ conversationId: string; message: Message }>) => {
       console.log('[REDUCER] addOwnMessage', {
-  conv: a.payload.conversationId,
-  id: a.payload.message.id,
-  status: a.payload.message.status,
-});
+        conv: a.payload.conversationId,
+        id: a.payload.message.id,
+        status: a.payload.message.status,
+      });
       const { conversationId, message } = a.payload;
       if (!s.messagesMap[conversationId]) s.messagesMap[conversationId] = [];
       s.messagesMap[conversationId].push(message);
@@ -463,15 +464,15 @@ const chatSlice = createSlice({
 
     addIncomingMessage: (s, a: PayloadAction<{ conversationId: string; message: Message }>) => {
       console.log('[REDUCER] addIncomingMessage', {
-  conv: a.payload.conversationId,
-  id: a.payload.message.id,
-});
+        conv: a.payload.conversationId,
+        id: a.payload.message.id,
+      });
       const { conversationId, message } = a.payload;
       if (!s.messagesMap[conversationId]) s.messagesMap[conversationId] = [];
       // Avoid duplicates (tempId → real id swap handled below)
       if (s.messagesMap[conversationId].some((m) => m.id === message.id)) return;
       s.messagesMap[conversationId].push(message);
-      
+
       // BUG FIX #10: Always update lastMessage, only skip unreadCount when active
       const conv = s.conversations.find((c) => c.id === conversationId);
       if (conv) {
@@ -483,75 +484,73 @@ const chatSlice = createSlice({
     },
 
     // When server confirms a message sent (tempId → real id)
-confirmMessage: (
-  s,
-  a: PayloadAction<{
-    conversationId: string;
-    tempId: string;
-    realId: string;
-    createdAt: string;
-  }>
-) => {
-  
-  const { conversationId, tempId, realId, createdAt } = a.payload;
-  const msgs = s.messagesMap[conversationId];
-  if (!msgs) return;
+    confirmMessage: (
+      s,
+      a: PayloadAction<{
+        conversationId: string;
+        tempId: string;
+        realId: string;
+        createdAt: string;
+      }>
+    ) => {
+      const { conversationId, tempId, realId, createdAt } = a.payload;
+      const msgs = s.messagesMap[conversationId];
+      if (!msgs) return;
 
-  const tempIndex = msgs.findIndex((m) => m.id === tempId);
-  const realIndex = msgs.findIndex((m) => m.id === realId);
+      const tempIndex = msgs.findIndex((m) => m.id === tempId);
+      const realIndex = msgs.findIndex((m) => m.id === realId);
 
-  // ✅ CASE 1: temp exists → replace
-  if (tempIndex !== -1) {
-    const msg = msgs[tempIndex];
+      // ✅ CASE 1: temp exists → replace
+      if (tempIndex !== -1) {
+        const msg = msgs[tempIndex];
 
-    msg.id = realId;
+        msg.id = realId;
 
-    if (msg.status === 'pending') {
-      msg.status = 'sent';
-    }
+        if (msg.status === 'pending') {
+          msg.status = 'sent';
+        }
 
-    msg.timestamp = createdAt; // or new Date(createdAt)
-console.log('[REDUCER] confirm START', {
-  conv: conversationId,
-  tempId,
-  realId,
-});
-    // remove duplicate real message if exists
-    if (realIndex !== -1 && realIndex !== tempIndex) {
-      msgs.splice(realIndex, 1);
-    }
+        msg.timestamp = createdAt; // or new Date(createdAt)
+        console.log('[REDUCER] confirm START', {
+          conv: conversationId,
+          tempId,
+          realId,
+        });
+        // remove duplicate real message if exists
+        if (realIndex !== -1 && realIndex !== tempIndex) {
+          msgs.splice(realIndex, 1);
+        }
 
-    // ✅ update conversation preview
-    const conv = s.conversations.find(c => c.id === conversationId);
-    if (conv) conv.lastMessage = msg;
+        // ✅ update conversation preview
+        const conv = s.conversations.find((c) => c.id === conversationId);
+        if (conv) conv.lastMessage = msg;
 
-    return;
-  }
+        return;
+      }
 
-  // ✅ CASE 2: temp missing but real exists
-  if (realIndex !== -1) {
-    const msg = msgs[realIndex];
+      // ✅ CASE 2: temp missing but real exists
+      if (realIndex !== -1) {
+        const msg = msgs[realIndex];
 
-    if (msg.status === 'pending') {
-      msg.status = 'sent';
-    }
- msg.timestamp = createdAt;
-    return;
-  }
+        if (msg.status === 'pending') {
+          msg.status = 'sent';
+        }
+        msg.timestamp = createdAt;
+        return;
+      }
 
-  // ❌ DO NOT inject fake message
-  console.warn('confirmMessage fallback hit', a.payload);
-}
-,
+      // ❌ DO NOT inject fake message
+      console.warn('confirmMessage fallback hit', a.payload);
+    },
     updateMessageStatus: (
       s,
       a: PayloadAction<{ conversationId: string; messageId: string; status: Message['status'] }>
     ) => {
       console.log('[REDUCER] updateMessageStatus', {
-  conv: a.payload.conversationId,
-  id: a.payload.messageId,
-  status: a.payload.status,
-});
+        conv: a.payload.conversationId,
+        id: a.payload.messageId,
+        status: a.payload.status,
+      });
       const msgs = s.messagesMap[a.payload.conversationId];
       if (msgs) {
         const m = msgs.find((m) => m.id === a.payload.messageId);
@@ -670,12 +669,12 @@ console.log('[REDUCER] confirm START', {
       if (!m.reactions) m.reactions = [];
       if (a.payload.added) {
         if (!m.reactions.some((r) => r.emoji === a.payload.emoji && r.userId === a.payload.userId))
-       m.reactions.push({
-  emoji: a.payload.emoji,
-  userId: a.payload.userId,
-  userName: a.payload.username,
-  timestamp: new Date().toISOString(),
-});
+          m.reactions.push({
+            emoji: a.payload.emoji,
+            userId: a.payload.userId,
+            userName: a.payload.username,
+            timestamp: new Date().toISOString(),
+          });
       } else {
         m.reactions = m.reactions.filter(
           (r) => !(r.emoji === a.payload.emoji && r.userId === a.payload.userId)
@@ -901,7 +900,7 @@ console.log('[REDUCER] confirm START', {
         s.isLoadingMessages = false;
         if (!a.payload) return;
         const { conversationId, messages, hasMore, nextCursor } = a.payload;
-        
+
         // BUG FIX #5: Merge with existing socket-delivered messages
         const existing = s.messagesMap[conversationId] || [];
         const httpIds = new Set(messages.map((m) => m.id));
@@ -911,7 +910,7 @@ console.log('[REDUCER] confirm START', {
         s.messagesMap[conversationId] = [...messages, ...socketOnly].sort(
           (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
         );
-        
+
         s.hasMoreMessages[conversationId] = hasMore;
         s.paginationCursors[conversationId] = nextCursor;
       })

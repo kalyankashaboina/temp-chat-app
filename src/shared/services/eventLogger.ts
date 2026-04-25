@@ -96,16 +96,12 @@ class EventLogger {
     // Log to console in development
     if (import.meta.env.DEV) {
       const style = this.getConsoleStyle(type);
-      console.log(
-        `%c[EVENT] ${type}`,
-        style,
-        {
-          messageId: options?.messageId,
-          tempId: options?.tempId,
-          conversationId: options?.conversationId,
-          payload: options?.payload,
-        }
-      );
+      console.log(`%c[EVENT] ${type}`, style, {
+        messageId: options?.messageId,
+        tempId: options?.tempId,
+        conversationId: options?.conversationId,
+        payload: options?.payload,
+      });
     }
 
     // Log errors to console always
@@ -146,7 +142,9 @@ class EventLogger {
    * Get message lifecycle (all events for a message)
    */
   getMessageLifecycle(messageId: string): EventLog[] {
-    return this.logs.filter((log) => log.messageId === messageId || log.tempId === messageId).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+    return this.logs
+      .filter((log) => log.messageId === messageId || log.tempId === messageId)
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 
   /**

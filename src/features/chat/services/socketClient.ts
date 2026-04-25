@@ -215,7 +215,10 @@ class RealSocket {
   }
 
   markRead(conversationId: string): void {
-    eventLogger.log('CONNECTION_STATUS_CHANGE', { conversationId, payload: { action: 'mark_read' } });
+    eventLogger.log('CONNECTION_STATUS_CHANGE', {
+      conversationId,
+      payload: { action: 'mark_read' },
+    });
     this.socket?.emit(SOCKET_EVENTS.CONV_READ, { conversationId });
   }
 

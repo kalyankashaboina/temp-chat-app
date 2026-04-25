@@ -5,21 +5,13 @@ const ConversationList = lazy(() =>
   import('./ConversationList').then((m) => ({ default: m.ConversationList }))
 );
 
-const ChatWindow = lazy(() =>
-  import('./ChatWindow').then((m) => ({ default: m.ChatWindow }))
-);
+const ChatWindow = lazy(() => import('./ChatWindow').then((m) => ({ default: m.ChatWindow })));
 
-const CallHistory = lazy(() =>
-  import('./CallHistory').then((m) => ({ default: m.CallHistory }))
-);
+const CallHistory = lazy(() => import('./CallHistory').then((m) => ({ default: m.CallHistory })));
 
-const UsersList = lazy(() =>
-  import('./UsersList').then((m) => ({ default: m.UsersList }))
-);
+const UsersList = lazy(() => import('./UsersList').then((m) => ({ default: m.UsersList })));
 
-const AIChat = lazy(() =>
-  import('./AIChat').then((m) => ({ default: m.AIChat }))
-);
+const AIChat = lazy(() => import('./AIChat').then((m) => ({ default: m.AIChat })));
 
 const ProfileScreen = lazy(() =>
   import('./ProfileScreen').then((m) => ({ default: m.ProfileScreen }))
@@ -46,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { MessageSquare, Phone, UserPlus, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 type TabType = 'chats' | 'calls' | 'users';
 
@@ -74,6 +67,7 @@ function ChatContent() {
   const [activeTab, setActiveTab] = useState<TabType>('chats');
   const [showProfile, setShowProfile] = useState(false);
   const [showMediaGallery, setShowMediaGallery] = useState(false);
+  const [aiChatEnabled, setAiChatEnabled] = useState(false);
 
   // Swipe gestures for mobile navigation
   const { handlers: swipeHandlers } = useSwipeGesture({
@@ -203,9 +197,11 @@ function ChatContent() {
                   exit={{ opacity: 0, x: 20 }}
                   className="h-full"
                 >
-                <Suspense fallback={null}>
-  <ConversationList />
-</Suspense>
+                  <ErrorBoundary>
+                    <Suspense fallback={null}>
+                      <ConversationList />
+                    </Suspense>
+                  </ErrorBoundary>
                 </motion.div>
               )}
               {activeTab === 'calls' && (
@@ -251,7 +247,11 @@ function ChatContent() {
             !showChatWindow && 'hidden md:flex'
           )}
         >
-          <ChatWindow onOpenMediaGallery={() => setShowMediaGallery(true)} />
+          <ErrorBoundary>
+            <Suspense fallback={null}>
+              <ChatWindow onOpenMediaGallery={() => setShowMediaGallery(true)} />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
 
@@ -259,11 +259,14 @@ function ChatContent() {
       <NotificationPrompt translate={translate} />
 
       {/* AI Chat floating button */}
-      {false && <AIChat translate={translate} />}
+      {aiChatEnabled && <AIChat translate={translate} />}
 
       {/* Profile Screen */}
-      <ProfileScreen open={showProfile} onClose={() => setShowProfile(false)} />
-
+      <ErrorBoundary>
+        <Suspense fallback={null}>
+          <ProfileScreen open={showProfile} onClose={() => setShowProfile(false)} />
+        </Suspense>
+      </ErrorBoundary>
       {/* Media Gallery */}
       <MediaGallery open={showMediaGallery} onClose={() => setShowMediaGallery(false)} />
 

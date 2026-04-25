@@ -94,8 +94,6 @@ export function useChat() {
     }
   }, [authUser?.id, currentUserId, dispatch]);
 
-
-
   const activeConversation = useMemo(
     () => conversations.find((c) => c.id === activeConversationId) || null,
     [conversations, activeConversationId]
@@ -128,12 +126,12 @@ export function useChat() {
   );
 
   useEffect(() => {
-  console.log('[UI] messages updated', {
-    conv: activeConversationId,
-    count: messages.length,
-    last: messages[messages.length - 1],
-  });
-}, [messages, activeConversationId]);
+    console.log('[UI] messages updated', {
+      conv: activeConversationId,
+      count: messages.length,
+      last: messages[messages.length - 1],
+    });
+  }, [messages, activeConversationId]);
 
   // ── Socket event listeners ────────────────────────────────────────────────
 
@@ -161,55 +159,55 @@ export function useChat() {
       ),
 
       // Messages
-     socketClient.on('message:new', (e) => {
-  const p = e.payload as {
-    id: string;
-    conversationId: string;
-    senderId: string;
-    content: string;
-    createdAt: string;
-    tempId?: string;
-  };
+      socketClient.on('message:new', (e) => {
+        const p = e.payload as {
+          id: string;
+          conversationId: string;
+          senderId: string;
+          content: string;
+          createdAt: string;
+          tempId?: string;
+        };
 
-  eventLogger.log('MESSAGE_NEW', {
-    messageId: p.id,
-    tempId: p.tempId,
-    conversationId: p.conversationId,
-    userId: p.senderId,
-    payload: { content: p.content },
-  });
+        eventLogger.log('MESSAGE_NEW', {
+          messageId: p.id,
+          tempId: p.tempId,
+          conversationId: p.conversationId,
+          userId: p.senderId,
+          payload: { content: p.content },
+        });
 
-  const isOwn = p.senderId === currentUserIdRef.current;
+        const isOwn = p.senderId === currentUserIdRef.current;
 
-  const incoming: Message = {
-    id: p.id,
-    content: p.content,
-    senderId: p.senderId,
-    timestamp: p.createdAt, // ✅ FIX (string, not Date)
-    status: 'sent',
-    attachments: [],
-    isOwn,
-    reactions: [],
-  };
+        const incoming: Message = {
+          id: p.id,
+          content: p.content,
+          senderId: p.senderId,
+          timestamp: p.createdAt, // ✅ FIX (string, not Date)
+          status: 'sent',
+          attachments: [],
+          isOwn,
+          reactions: [],
+        };
 
-  // ✅ ONLY add messages from OTHER users
-  if (!isOwn) {
-    dispatch(
-      addIncomingMessage({
-        conversationId: p.conversationId,
-        message: incoming,
-      })
-    );
+        // ✅ ONLY add messages from OTHER users
+        if (!isOwn) {
+          dispatch(
+            addIncomingMessage({
+              conversationId: p.conversationId,
+              message: incoming,
+            })
+          );
 
-    eventLogger.log('MESSAGE_RECEIVED', {
-      messageId: p.id,
-      conversationId: p.conversationId,
-      userId: p.senderId,
-    });
-  }
+          eventLogger.log('MESSAGE_RECEIVED', {
+            messageId: p.id,
+            conversationId: p.conversationId,
+            userId: p.senderId,
+          });
+        }
 
-  // ❌ DO NOT call confirmMessage here
-}),
+        // ❌ DO NOT call confirmMessage here
+      }),
       socketClient.on('message:sent', (e) => {
         const p = e.payload as {
           tempId: string;
@@ -231,7 +229,7 @@ export function useChat() {
           })
         );
       }),
-      
+
       // BUG FIX #4: Listen for message:confirmed from queue processor (real MongoDB ID)
       socketClient.on('message:confirmed', (e) => {
         const p = e.payload as {
@@ -254,7 +252,7 @@ export function useChat() {
           })
         );
       }),
-      
+
       socketClient.on('message:delivered', (e) => {
         const p = e.payload as { messageId: string; conversationId: string };
         eventLogger.log('MESSAGE_DELIVERED', {
@@ -393,7 +391,11 @@ export function useChat() {
 
       // BUG FIX #6: Call event listeners
       socketClient.on('call:incoming', (e) => {
-        const p = e.payload as { fromUserId: string; callType: 'audio' | 'video'; offer: RTCSessionDescriptionInit };
+        const p = e.payload as {
+          fromUserId: string;
+          callType: 'audio' | 'video';
+          offer: RTCSessionDescriptionInit;
+        };
         eventLogger.log('CALL_INCOMING', {
           userId: p.fromUserId,
           payload: { callType: p.callType },

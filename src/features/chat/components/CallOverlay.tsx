@@ -341,13 +341,13 @@ export function useCall(translate: (key: string) => string) {
       try {
         // Import webrtcService at the top of the file
         const { default: webrtcService } = await import('@/features/chat/services/webrtcService');
-        
+
         // Initiate real WebRTC call
         await webrtcService.initiateCall(remoteUser.id, type);
-        
+
         // Also emit via socket for call signaling
         socketClient.initiateCall(remoteUser.id, type);
-        
+
         // State transitions will happen via socket events (call:accepted, call:rejected, etc.)
         // These are handled in useChat.ts
       } catch (error) {
