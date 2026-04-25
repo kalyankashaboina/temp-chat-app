@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" fill="none">
+  <defs>
+    <linearGradient id="bg192" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="50%" stop-color="#6d28d9"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="shine192" x1="0" y1="0" x2="0" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.2"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="bubble192" x1="24" y1="38" x2="168" y2="148" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="bolt192" x1="88" y1="52" x2="108" y2="140" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="boltGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="bubbleShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Safe zone: full background (maskable - fills entire 192x192) -->
+  <rect width="192" height="192" fill="url(#bg192)"/>
+  <!-- Shine -->
+  <rect width="192" height="192" fill="url(#shine192)"/>
+
+  <!-- Subtle background circle accent -->
+  <circle cx="155" cy="40" r="55" fill="white" fill-opacity="0.04"/>
+  <circle cx="35" cy="160" r="45" fill="white" fill-opacity="0.04"/>
+
+  <!-- Chat bubble - centered in safe zone (approx 38px inset for maskable) -->
+  <g filter="url(#bubbleShadow)">
+    <path d="M34 52C34 44.27 40.27 38 48 38h96C151.73 38 158 44.27 158 52v72c0 7.73-6.27 14-14 14h-34l-14 18-14-18H48C40.27 138 34 131.73 34 124V52z"
+      fill="url(#bubble192)" stroke="white" stroke-opacity="0.3" stroke-width="1.5"/>
+  </g>
+
+  <!-- Lightning bolt "R" / relay signal inside bubble -->
+  <g filter="url(#boltGlow)">
+    <path d="M107 57L84 97h21L91 135 116 93H95L107 57z"
+      fill="url(#bolt192)" stroke="#fef9c3" stroke-width="1" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Three dots indicating "relay / live" at bottom right -->
+  <circle cx="128" cy="155" r="4.5" fill="white" fill-opacity="0.5"/>
+  <circle cx="142" cy="155" r="4.5" fill="white" fill-opacity="0.35"/>
+  <circle cx="156" cy="155" r="4.5" fill="white" fill-opacity="0.2"/>
+</svg>

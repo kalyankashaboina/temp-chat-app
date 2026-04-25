@@ -259,7 +259,7 @@ function ChatContent() {
       <NotificationPrompt translate={translate} />
 
       {/* AI Chat floating button */}
-      <AIChat translate={translate} />
+      {false && <AIChat translate={translate} />}
 
       {/* Profile Screen */}
       <ProfileScreen open={showProfile} onClose={() => setShowProfile(false)} />
