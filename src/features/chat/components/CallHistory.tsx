@@ -115,7 +115,7 @@ export function CallHistory({ calls, onCallBack, translate }: CallHistoryProps) 
               {/* Time and call button */}
               <div className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground">
-                  {formatCallTime(call.timestamp)}
+                  {formatCallTime(new Date(call.timestamp))}
                 </span>
                 <div className="rounded-full bg-primary/10 p-2 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                   <CallIcon className="h-4 w-4" />

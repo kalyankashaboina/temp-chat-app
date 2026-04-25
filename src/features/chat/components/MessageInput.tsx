@@ -195,7 +195,7 @@ export function MessageInput({ editingMessage, onCancelEdit, onSaveEdit }: Messa
     const newScheduledMessage: ScheduledMessage = {
       id: scheduleId,
       content: message,
-      scheduledAt,
+      scheduledAt: scheduledAt.toISOString(),
       attachments: selectedFiles.map((sf) => sf.file),
     };
 

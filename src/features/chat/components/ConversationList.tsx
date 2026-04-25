@@ -120,7 +120,9 @@ function ConversationItem({
             </div>
             <div className="flex items-center gap-2">
               {lastMessageTime && (
-                <span className="text-xs text-muted-foreground">{formatTime(lastMessageTime)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatTime(new Date(lastMessageTime))}
+                </span>
               )}
               {conversation.unreadCount > 0 && !conversation.isMuted && (
                 <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-xs font-bold text-primary-foreground">

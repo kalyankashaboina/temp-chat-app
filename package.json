@@ -1,7 +1,7 @@
 {
   "name": "relay-chat-frontend",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "preview": "vite preview",
     "type-check": "tsc --build",
+   "ci:local": "sh scripts/local-ci-check.sh",
     "analyze": "vite build --mode production && npx vite-bundle-visualizer"
   },
   "dependencies": {

@@ -112,7 +112,7 @@ function mapMessage(m: ApiMessage, currentUserId: string): Message {
     id: m._id,
     content: m.content,
     senderId,
-    timestamp: new Date(m.createdAt),
+    timestamp: m.createdAt,
     status: 'read' as MessageStatus,
     attachments: (m.attachments ?? []).map(
       (a): FileAttachment => ({
@@ -128,7 +128,7 @@ function mapMessage(m: ApiMessage, currentUserId: string): Message {
     ),
     isOwn: senderId === currentUserId,
     isEdited: m.isEdited,
-    editedAt: m.editedAt ? new Date(m.editedAt) : undefined,
+    editedAt: m.editedAt ? m.editedAt : undefined,
     isDeleted: m.isDeleted,
     reactions: (m.reactions ?? []).map((r) => ({
       emoji: r.emoji,
